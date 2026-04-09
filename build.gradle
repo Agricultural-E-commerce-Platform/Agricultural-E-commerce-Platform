@@ -1,0 +1,75 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.13'          // 스프링 부트 플러그인
+	id 'io.spring.dependency-management' version '1.1.7'    // 의존성 버전 자동 관리
+}
+
+group = 'com.spartafarmer'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)         // Java 17 사용
+	}
+}
+
+repositories {
+	mavenCentral()  // 의존성 다운로드 저장소
+}
+
+dependencies {
+	// ===== Spring Boot Starters =====
+	implementation 'org.springframework.boot:spring-boot-starter-cache'        // 캐싱 (Caffeine, Redis 등)
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'     // JPA (ORM)
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'   // Redis 연동
+	implementation 'org.springframework.boot:spring-boot-starter-security'     // Spring Security (인증/인가)
+	implementation 'org.springframework.boot:spring-boot-starter-validation'   // 입력값 유효성 검사
+	implementation 'org.springframework.boot:spring-boot-starter-web'          // 웹 MVC (REST API)
+
+	// ===== Lombok =====
+	compileOnly 'org.projectlombok:lombok'                  // 컴파일 시에만 사용 (getter/setter 자동 생성 등)
+	annotationProcessor 'org.projectlombok:lombok'          // 어노테이션 처리기
+
+	// ===== Database =====
+	runtimeOnly 'com.mysql:mysql-connector-j'               // MySQL 드라이버 (런타임에만 필요)
+
+	// ===== Test =====
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'     // 테스트 기본 라이브러리
+	testImplementation 'org.springframework.security:spring-security-test'     // Security 테스트
+	testCompileOnly 'org.projectlombok:lombok'              // 테스트에서 Lombok 사용
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'               // JUnit 실행기
+	testAnnotationProcessor 'org.projectlombok:lombok'      // 테스트에서 Lombok 어노테이션 처리
+
+	// ===== Caffeine Cache (로컬 인메모리 캐시) =====
+	implementation 'com.github.ben-manes.caffeine:caffeine' // 버전은 Spring Boot가 자동 관리
+
+	// ===== QueryDSL (타입 안전한 동적 쿼리) =====
+	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'                   // QueryDSL JPA 지원
+	annotationProcessor 'com.querydsl:querydsl-apt:5.0.0:jakarta'              // Q클래스 자동 생성
+	annotationProcessor 'jakarta.annotation:jakarta.annotation-api'            // Jakarta 어노테이션
+	annotationProcessor 'jakarta.persistence:jakarta.persistence-api'          // Jakarta Persistence
+
+	// ===== JWT (JSON Web Token) =====
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'        // JWT API
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'          // JWT 구현체 (런타임)
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'       // JWT JSON 파싱 (런타임)
+}
+
+tasks.named('test') {
+	useJUnitPlatform()  // JUnit5 플랫폼으로 테스트 실행
+}
+
+// ===== QueryDSL Q클래스 생성 설정 =====
+def generated = 'src/main/generated'  // Q클래스가 생성될 경로
+
+sourceSets {
+	main.java.srcDirs += [ generated ]  // generated 폴더를 소스 경로에 추가
+}
+
+tasks.withType(JavaCompile) {
+	options.getGeneratedSourceOutputDirectory().set(file(generated))  // 컴파일 시 Q클래스 생성 위치 지정
+}
+
+clean.doLast {
+	file(generated).deleteDir()  // clean 시 generated 폴더 삭제
+}
