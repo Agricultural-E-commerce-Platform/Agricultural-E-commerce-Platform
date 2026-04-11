@@ -31,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String url = request.getRequestURI();
 
         // 인증이 필요 없는 URL은 필터를 건너뜀 (회원가입, 로그인)
-        if(url.startsWith("/auth")) {
+        if(url.startsWith("/api/auth")) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -41,7 +41,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 토큰이 없는 경우 400을 반환
         if (bearerToken == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "JWT 토큰이 필요합니다.");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 필요합니다.");
             return;
         }
 
