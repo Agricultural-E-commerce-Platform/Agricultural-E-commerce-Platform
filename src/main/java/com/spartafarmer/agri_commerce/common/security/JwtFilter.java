@@ -39,7 +39,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // Authorization 헤더에서 Bearer 토큰 추출
         String bearerToken = request.getHeader("Authorization");
 
-        // 토큰이 없는 경우 400을 반환
+        // 토큰이 없는 경우 401을 반환
         if (bearerToken == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 필요합니다.");
             return;
