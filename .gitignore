@@ -29,10 +29,8 @@ bin/
 # VS Code
 .vscode/
 
-# macOS
+# OS
 .DS_Store
-
-# Windows
 Thumbs.db
 
 # Compiled class file
@@ -56,6 +54,14 @@ logs/
 *.bak
 *.swp
 *~
+
+# 환경 변수 (보안)
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.override.yml
 
 # yml 파일
 /src/main/resources/application-local.yml
