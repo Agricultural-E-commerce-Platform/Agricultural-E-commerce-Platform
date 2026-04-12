@@ -60,16 +60,16 @@ tasks.named('test') {
 }
 
 // ===== QueryDSL Q클래스 생성 설정 =====
-def generated = 'src/main/generated'  // Q클래스가 생성될 경로
+def generated = 'build/generated/sources/annotationProcessor/java/main'
 
 sourceSets {
-	main.java.srcDirs += [ generated ]  // generated 폴더를 소스 경로에 추가
+	main.java.srcDirs += [ generated ]
 }
 
 tasks.withType(JavaCompile) {
-	options.getGeneratedSourceOutputDirectory().set(file(generated))  // 컴파일 시 Q클래스 생성 위치 지정
+	options.getGeneratedSourceOutputDirectory().set(file(generated))
 }
 
 clean.doLast {
-	file(generated).deleteDir()  // clean 시 generated 폴더 삭제
+	file(generated).deleteDir()
 }
