@@ -57,6 +57,14 @@ logs/
 *.swp
 *~
 
+# 환경 변수 (보안)
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.override.yml
+
 # yml 파일
 /src/main/resources/application-local.yml
 /src/main/resources/application-prod.yml
