@@ -1,5 +1,8 @@
 name: CI
 
+permissions:
+  contents: read
+
 on:
   # dev 브랜치 PR 생성/업데이트 시 빌드 & 테스트 실행
   push:
@@ -36,7 +39,7 @@ jobs:
       - name: Gradle 권한 설정
         run: chmod +x gradlew
 
-      # 테스트 제외 빌드 (테스트는 별도로 실행 예정)
+      # 테스트 제외 빌드 (테스트는 별도로 실행 예정) - 아직 테스트 코드가 없음
       - name: Gradle 빌드
         run: ./gradlew build -x test
 
@@ -52,5 +55,5 @@ jobs:
       - name: Docker 이미지 빌드 & 푸시
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:latest .
-          docker push ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:latest
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:${{ github.sha }} .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:${{ github.sha }}
