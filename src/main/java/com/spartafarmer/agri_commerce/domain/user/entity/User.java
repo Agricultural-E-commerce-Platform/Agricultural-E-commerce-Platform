@@ -29,7 +29,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    // 정책문제 - Todo 전화번호도 중복 불가한지 논의해야함(유니크 제약)
     @Column(nullable = false)
     private String phone;
 
@@ -40,7 +39,7 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserRole role;
 
-    // 회원정보 변경 기능이 추가 되어서 updatedAt 만들었음 - Todo 각 엔티티에 모두 필요하면 BaseEntity를 수정하면 되는데 대부분 없어서 여기는 직접 적음
+    // 회원정보 변경 기능이 추가 되어서 updatedAt 만들었음 - Todo: 각 엔티티에 모두 필요하면 BaseEntity를 수정하면 되는데 대부분 없어서 여기는 직접 적음 - 지훈
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
@@ -60,7 +59,7 @@ public class User extends BaseEntity {
         return new User(email, password, name, phone, address, role);
     }
 
-    // 회원 정보 수정 - Todo 이름, 주소, 전화번호 모두 필수로 받아서 전체 업데이트 vs 부분 수정 가능
+    // 회원 정보 수정 - 전체 수정(부분 수정 X)
     public void update(String name, String phone, String address) {
         this.name = name;
         this.phone = phone;

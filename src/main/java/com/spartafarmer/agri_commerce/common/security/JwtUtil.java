@@ -19,7 +19,7 @@ import java.util.Date;
 public class JwtUtil {
 
     private static final String BEARER_PREFIX = "Bearer ";
-    private static final long TOKEN_TIME = 60 * 60 * 1000L; // 60분 - Todo 아직 정책이 없어서 임의 설정 후 관련 정책에 기록해둠
+    private static final long TOKEN_TIME = 60 * 60 * 1000L; // 토큰 만료 시간 - 60분
 
     @Value("${jwt.secret.key}")
     private String secretKey;
