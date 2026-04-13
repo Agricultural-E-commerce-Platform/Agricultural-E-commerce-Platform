@@ -57,9 +57,6 @@ logs/
 *.swp
 *~
 
-# generated (QueryDSL Q클래스)
-src/main/generated/
-
 # yml 파일
 /src/main/resources/application-local.yml
 /src/main/resources/application-prod.yml
