@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  # ================================
+  # Spring Boot 애플리케이션
+  # ================================
+  app:
+    build: .                                  # 현재 디렉토리 Dockerfile로 빌드
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}           # 운영 환경 프로파일
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME} # db = 서비스명으로 연결
+      - SPRING_DATASOURCE_USERNAME=${DB_USER}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}          # redis = 서비스명으로 연결
+      - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
+      # - JWT_SECRET_KEY=${JWT_SECRET_KEY}    # AWS 배포 시 활성화
+    depends_on:
+      db:
+        condition: service_healthy            # DB 헬스체크 통과 후 앱 시작
+      redis:
+        condition: service_healthy            # Redis 헬스체크 통과 후 앱 시작
+    restart: always                           # 컨테이너 종료 시 자동 재시작
+
+  # ================================
+  # MySQL 데이터베이스
+  # ================================
+  db:
+    image: mysql:8.0
+    container_name: mysql-db
+    command: --default-authentication-plugin=mysql_native_password  # MySQL 8.0 인증 호환성
+    environment:
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+    ports:
+      - "3306:3306"                           # 로컬에서 MySQL 직접 접속 시 필요 (운영에서는 제거 권장)
+    volumes:
+      - db_data:/var/lib/mysql               # 데이터 영속성 보장 (컨테이너 삭제 시에도 유지)
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s                          # 10초마다 상태 체크
+      timeout: 5s                            # 5초 내 응답 없으면 실패
+      retries: 5                             # 5번 실패 시 unhealthy 처리
+
+  # ================================
+  # Redis 캐시 & 동시성 제어
+  # ================================
+  redis:
+    image: redis:7.0
+    container_name: redis
+    restart: always
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]     # redis-cli ping으로 상태 확인
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:    # MySQL 데이터 볼륨

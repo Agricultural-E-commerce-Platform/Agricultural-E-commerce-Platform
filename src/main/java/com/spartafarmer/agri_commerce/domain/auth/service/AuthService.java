@@ -27,7 +27,7 @@ public class AuthService {
     @Transactional
     public void signup(SignupRequest request) {
 
-        // 정책문제 - Todo 전화번호도 중복 체크가 필요한지 논의해야함(User 엔티니 참고)
+        // 정책문제
         // 이메일 중복 체크
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new CustomException(ErrorCode.USER_DUPLICATE_EMAIL);

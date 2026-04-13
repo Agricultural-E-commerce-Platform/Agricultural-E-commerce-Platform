@@ -14,12 +14,11 @@ spring:
       ddl-auto: update  # 개발 환경 기준
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQLDialect
         show_sql: true
         format_sql: true
 
-#  Redis 설정
-#  data:
-#    redis:
-#      host: localhost
-#      port: 6379
+  #  Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379

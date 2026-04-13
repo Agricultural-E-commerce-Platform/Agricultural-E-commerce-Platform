@@ -29,10 +29,8 @@ bin/
 # VS Code
 .vscode/
 
-# macOS
+# OS
 .DS_Store
-
-# Windows
 Thumbs.db
 
 # Compiled class file
