@@ -57,8 +57,13 @@ logs/
 *.swp
 *~
 
-# generated (QueryDSL Q클래스)
-src/main/generated/
+# 환경 변수 (보안)
+.env
+.env.*
+!.env.example
+
+# Docker
+docker-compose.override.yml
 
 # yml 파일
 /src/main/resources/application-local.yml
