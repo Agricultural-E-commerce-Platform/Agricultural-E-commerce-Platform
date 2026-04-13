@@ -45,7 +45,7 @@ public class User extends BaseEntity {
     private LocalDateTime updatedAt;
 
 
-    private User(String email, String password, String name, String address, String phone, UserRole role) {
+    private User(String email, String password, String name, String phone, String address, UserRole role) {
         this.email = email;
         this.password = password;
         this.name = name;
