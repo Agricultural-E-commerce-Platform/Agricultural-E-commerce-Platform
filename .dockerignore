@@ -1,0 +1,38 @@
+# Git
+.git
+.gitignore
+
+# Gradle build 결과물
+build/
+.gradle/
+
+# Node (혹시 프론트 같이 있을 경우)
+node_modules/
+
+# IDE 설정
+.idea/
+.vscode/
+*.iml
+
+# OS 파일
+.DS_Store
+Thumbs.db
+
+# 로그
+*.log
+
+# 테스트 관련
+src/test/
+
+# 환경 변수 (보안)
+.env
+.env.*
+!.env.example
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
+# yml 파일
+/src/main/resources/application-local.yml
+/src/main/resources/application-prod.yml

@@ -21,7 +21,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // 회원가입 -> Todo 우선 공통 응답으로 처리되게 했지만, 팀정책으로 합의를 봐야할 것 같습니다.
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Void>> signup(@Valid @RequestBody SignupRequest request) {
         authService.signup(request);
