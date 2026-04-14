@@ -12,7 +12,7 @@ public class SignupRequest {
     @NotBlank
     private String email;
 
-    @Pattern(regexp = "^[A-Za-z0-9]{8,12}$",
+    @Pattern(regexp = "^(?=.*[A-Za-z])(?=.*[0-9])[A-Za-z0-9]{8,12}$",
             message = "비밀번호는 영문, 숫자 포함 8~12자리여야 합니다.")
     @NotBlank
     private String password;
