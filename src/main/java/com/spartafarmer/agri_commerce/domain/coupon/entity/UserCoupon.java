@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@Table(name = "useCoupons")
+@Table(name = "user_coupons")
 public class UserCoupon extends BaseEntity {
 
     @Id
@@ -22,12 +22,12 @@ public class UserCoupon extends BaseEntity {
 
     // 쿠폰을 발급받은 회원
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // 발급된 쿠폰
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "couponId", nullable = false)
+    @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
     @Enumerated(EnumType.STRING)

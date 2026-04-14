@@ -2,6 +2,7 @@ package com.spartafarmer.agri_commerce.domain.coupon.repository;
 
 import com.spartafarmer.agri_commerce.common.enums.CouponStatus;
 import com.spartafarmer.agri_commerce.domain.coupon.entity.UserCoupon;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public interface UserCouponRepository extends JpaRepository<UserCoupon, Long> {
     List<UserCoupon> findByUserIdAndStatusOrderByExpiredAtAsc(Long userId, CouponStatus status);
 
     // 만료 일괄 처리 대상 조회 (특정 쿠폰의 미사용 쿠폰들)
-    List<UserCoupon> findByCouponIdAndStatus(Long couponId, CouponStatus status);
+    List<UserCoupon> findByCouponIdAndStatus(Long couponId, CouponStatus status, Pageable pageable);
 
     // 단건 조회 (쿠폰 사용 시)
     Optional<UserCoupon> findByIdAndUserId(Long id, Long userId);
