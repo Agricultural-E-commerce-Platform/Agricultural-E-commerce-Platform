@@ -25,9 +25,10 @@ public enum ErrorCode {
     USER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다. (영문, 숫자 포함 8자리 이상)"),
     USER_INVALID_EMAIL(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다."),
-    USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다.");
+    USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
 
     // 상품
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다.");
 
     // 주문
 

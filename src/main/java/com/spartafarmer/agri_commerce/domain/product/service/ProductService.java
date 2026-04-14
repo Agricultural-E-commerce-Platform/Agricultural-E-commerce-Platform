@@ -2,6 +2,8 @@ package com.spartafarmer.agri_commerce.domain.product.service;
 
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
+import com.spartafarmer.agri_commerce.common.exception.CustomException;
+import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductDetailResponse;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
@@ -49,7 +51,7 @@ public class ProductService {
     // 상품 상세 조회
     public ProductDetailResponse getProduct(Long productId) {
         Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         return new ProductDetailResponse(
                 product.getId(),
