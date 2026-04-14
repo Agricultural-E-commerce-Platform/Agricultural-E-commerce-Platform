@@ -28,7 +28,8 @@ public enum ErrorCode {
     USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
 
     // 상품
-
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
+    PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "현재 판매 중인 상품이 아닙니다."),
     // 주문
 
     // 장바구니
