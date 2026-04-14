@@ -28,6 +28,7 @@ src/test/
 .env
 .env.*
 !.env.example
+!.env.prod.example
 
 # Docker
 Dockerfile
