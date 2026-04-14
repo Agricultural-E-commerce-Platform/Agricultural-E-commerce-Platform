@@ -16,7 +16,8 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
       - SPRING_DATA_REDIS_HOST=${REDIS_HOST}          # redis = 서비스명으로 연결
       - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
-      # - JWT_SECRET_KEY=${JWT_SECRET_KEY}    # AWS 배포 시 활성화
+      # JWT는 docker-compose.prod.yml에서 설정
+
     depends_on:
       db:
         condition: service_healthy            # DB 헬스체크 통과 후 앱 시작
