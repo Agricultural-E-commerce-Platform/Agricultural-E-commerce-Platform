@@ -29,8 +29,11 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable) // 폼 로그인 비활성화 (JWT 사용)
                 .addFilterBefore(jwtFilter, SecurityContextHolderAwareRequestFilter.class) // JWT 필터 등록
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll() // 회원가입, 로그인 인증 불필요
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN") // 관리자만 접근 가능
+                        .requestMatchers("/api/auth/**").permitAll()         // 회원가입, 로그인
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")   // 관리자만
+                        .requestMatchers("/api/products/**").permitAll()     // 상품 조회
+                        .requestMatchers("/api/v1/products/**").permitAll()  // 검색 v1
+                        .requestMatchers("/api/v2/products/**").permitAll()  // 검색 v2
                         .anyRequest().authenticated() // 나머지는 인증 필요
                 )
                 .build();
