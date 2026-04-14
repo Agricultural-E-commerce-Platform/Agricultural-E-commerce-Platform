@@ -38,10 +38,6 @@ public class UserCoupon extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime expiredAt;
 
-    // 쿠폰 사용 시각 (미사용 시 null)
-    @Column
-    private LocalDateTime usedAt;
-
     private UserCoupon(User user, Coupon coupon, LocalDateTime expiredAt) {
         this.user = user;
         this.coupon = coupon;
@@ -58,9 +54,8 @@ public class UserCoupon extends BaseEntity {
     }
 
     // 쿠폰 사용 처리
-    public void use(LocalDateTime usedAt) {
+    public void use() {
         this.status = CouponStatus.USED;
-        this.usedAt = usedAt;
     }
 
     // 쿠폰 만료 처리 (스케줄러 일괄 처리용)
