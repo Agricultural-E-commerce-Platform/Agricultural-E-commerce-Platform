@@ -1,0 +1,27 @@
+version: "3.8"
+
+# 튜터님 서버 배포용 docker-compose
+# db, redis는 튜터님 서버 3에 이미 설치되어 있어서 제외
+services:
+  app:
+    image: ${DOCKERHUB_USERNAME}/agri-commerce:latest
+    container_name: spring-app
+    ports:
+      - "8080:8080"
+
+    environment:
+      - "SPRING_PROFILES_ACTIVE=prod"
+
+      # JWT 설정
+      - "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
+
+      # 외부 MySQL (튜터님 서버)
+      - "SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
+      - "SPRING_DATASOURCE_USERNAME=${DB_USER}"
+      - "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}"
+
+      # 외부 Redis (튜터님 서버)
+      - "SPRING_DATA_REDIS_HOST=${REDIS_HOST}"
+      - "SPRING_DATA_REDIS_PORT=${REDIS_PORT}"
+
+    restart: always
