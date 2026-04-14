@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +14,8 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "cart_items")
+@SQLDelete(sql = "UPDATE cart_items SET deleted_at = NOW() WHERE id = ?")
+@Where(clause = "deleted_at IS NULL")
 public class CartItem extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,15 +57,5 @@ public class CartItem extends BaseEntity {
     // 수량 변경
     public void updateQuantity(int quantity) {
         this.quantity = quantity;
-    }
-
-    // 소프트 딜리트
-    public void delete() {
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    // 삭제 여부 확인
-    public boolean isDeleted() {
-        return this.deletedAt != null;
     }
 }
