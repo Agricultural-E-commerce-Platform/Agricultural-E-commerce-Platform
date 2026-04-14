@@ -8,9 +8,9 @@ WORKDIR /app
 COPY build.gradle settings.gradle ./
 RUN gradle dependencies --no-daemon || true
 
-# 전체 소스 복사 후 빌드 (테스트 제외)
+# 전체 소스 복사 후 빌드 (테스트 코드 컴파일 및 실행 제외)
 COPY . .
-RUN gradle build -x test --no-daemon
+RUN gradle assemble --no-daemon
 
 # ================================
 # 2단계: 실행 스테이지
