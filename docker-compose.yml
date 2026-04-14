@@ -10,13 +10,13 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}           # 운영 환경 프로파일
-      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME} # db = 서비스명으로 연결
-      - SPRING_DATASOURCE_USERNAME=${DB_USER}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - SPRING_DATA_REDIS_HOST=${REDIS_HOST}          # redis = 서비스명으로 연결
-      - SPRING_DATA_REDIS_PORT=${REDIS_PORT}
-      # JWT는 docker-compose.prod.yml에서 설정
+      - "SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}"           # 운영 환경 프로파일
+      - "SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${DB_NAME}" # db = 서비스명으로 연결
+      - "SPRING_DATASOURCE_USERNAME=${DB_USER}"
+      - "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}"
+      - "SPRING_DATA_REDIS_HOST=${REDIS_HOST}"          # redis = 서비스명으로 연결
+      - "SPRING_DATA_REDIS_PORT=${REDIS_PORT}"
+      # - "JWT_SECRET_KEY=${JWT_SECRET_KEY}"  # 로컬 테스트 시 주석 해제 후 .env에 값 추가
 
     depends_on:
       db:
@@ -33,10 +33,10 @@ services:
     container_name: mysql-db
     command: --default-authentication-plugin=mysql_native_password  # MySQL 8.0 인증 호환성
     environment:
-      - MYSQL_DATABASE=${DB_NAME}
-      - MYSQL_USER=${DB_USER}
-      - MYSQL_PASSWORD=${DB_PASSWORD}
-      - MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}
+      - "MYSQL_DATABASE=${DB_NAME}"
+      - "MYSQL_USER=${DB_USER}"
+      - "MYSQL_PASSWORD=${DB_PASSWORD}"
+      - "MYSQL_ROOT_PASSWORD=${DB_ROOT_PASSWORD}"
     ports:
       - "3306:3306"                           # 로컬에서 MySQL 직접 접속 시 필요 (운영에서는 제거 권장)
     volumes:
