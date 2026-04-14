@@ -43,7 +43,9 @@ public enum ErrorCode {
     USER_COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "보유한 쿠폰을 찾을 수 없습니다."),
     USER_COUPON_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 쿠폰입니다."),
     USER_COUPON_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 쿠폰입니다."),
-    COUPON_NOT_APPLICABLE(HttpStatus.BAD_REQUEST, "특가 상품이 포함된 주문에는 쿠폰을 사용할 수 없습니다.");
+    COUPON_NOT_APPLICABLE(HttpStatus.BAD_REQUEST, "특가 상품이 포함된 주문에는 쿠폰을 사용할 수 없습니다."),
+    INVALID_COUPON_START_TIME(HttpStatus.BAD_REQUEST, "시작 시각은 현재 시각 이후여야 합니다."),
+    INVALID_COUPON_END_TIME(HttpStatus.BAD_REQUEST, "종료 시각은 시작 시각보다 이후여야 합니다.");
 
     // 이 코드 위쪽에 에러 코드 작성
     private final HttpStatus status;

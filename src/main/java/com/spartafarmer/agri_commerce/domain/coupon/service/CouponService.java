@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class CouponService {
@@ -20,9 +22,16 @@ public class CouponService {
     @Transactional
     public CouponCreateResponse createCoupon(CouponCreateRequest request) {
 
+        LocalDateTime now = LocalDateTime.now();
+
+        // 시작 시각은 현재 이후여야 함
+        if (!request.getStartTime().isAfter(now)) {
+            throw new CustomException(ErrorCode.INVALID_COUPON_START_TIME);
+        }
+
         // 종료 시각은 시작 시각보다 이후여야 함
         if (!request.getEndTime().isAfter(request.getStartTime())) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
+            throw new CustomException(ErrorCode.INVALID_COUPON_END_TIME);
         }
 
         Coupon coupon = Coupon.create(
