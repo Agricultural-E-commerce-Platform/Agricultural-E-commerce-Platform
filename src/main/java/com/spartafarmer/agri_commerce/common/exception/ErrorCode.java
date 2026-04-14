@@ -25,7 +25,7 @@ public enum ErrorCode {
     USER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다. (영문, 숫자 포함 8자리 이상)"),
     USER_INVALID_EMAIL(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다."),
-    USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다.");
+    USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
 
     // 상품
 
@@ -34,7 +34,15 @@ public enum ErrorCode {
     // 장바구니
 
     // 쿠폰
-
+    COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
+    COUPON_SOLD_OUT(HttpStatus.CONFLICT, "선착순 쿠폰이 모두 소진되었습니다."),
+    COUPON_NOT_AVAILABLE_TIME(HttpStatus.BAD_REQUEST, "쿠폰 발급 가능 시간이 아닙니다."),
+    COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "이미 발급받은 쿠폰입니다."),
+    COUPON_LOCK_FAILED(HttpStatus.CONFLICT, "잠시 후 다시 시도해주세요."),
+    USER_COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "보유한 쿠폰을 찾을 수 없습니다."),
+    USER_COUPON_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 쿠폰입니다."),
+    USER_COUPON_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 쿠폰입니다."),
+    COUPON_NOT_APPLICABLE(HttpStatus.BAD_REQUEST, "특가 상품이 포함된 주문에는 쿠폰을 사용할 수 없습니다.");
 
     // 이 코드 위쪽에 에러 코드 작성
     private final HttpStatus status;
