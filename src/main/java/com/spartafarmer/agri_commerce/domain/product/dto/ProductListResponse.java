@@ -35,4 +35,5 @@ public record ProductListResponse(
                 product.getCreatedAt()
         );
     }
+
 }
