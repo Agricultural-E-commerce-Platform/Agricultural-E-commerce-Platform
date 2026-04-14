@@ -13,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -35,17 +33,7 @@ public class ProductService {
         }
 
         // 응답 DTO로 변환
-        return products.map(product -> new ProductListResponse(
-                product.getId(),
-                product.getName(),
-                product.getType(),
-                product.getNormalPrice(),
-                product.getSalePrice(),
-                product.getSpecialPrice(),
-                product.getStock(),
-                product.getStatus(),
-                product.getImageUrl(),
-                product.getCreatedAt()));
+        return products.map(ProductListResponse::from);
     }
 
     // 상품 상세 조회
@@ -53,17 +41,12 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        return new ProductDetailResponse(
-                product.getId(),
-                product.getName(),
-                product.getType(),
-                product.getStatus(),
-                product.getNormalPrice(),
-                product.getSalePrice(),
-                product.getSpecialPrice(),
-                product.getStock(),
-                product.getImageUrl(),
-                product.getCreatedAt()
-        );
+        // 판매 종료 상품
+        if (product.getStatus() == ProductStatus.SOLD_OUT ||
+                product.getStatus() == ProductStatus.SALE_ENDED) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
+        return ProductDetailResponse.from(product);
     }
 }

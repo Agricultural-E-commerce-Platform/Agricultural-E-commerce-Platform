@@ -2,6 +2,7 @@ package com.spartafarmer.agri_commerce.domain.product.dto;
 
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
+import com.spartafarmer.agri_commerce.domain.product.entity.Product;
 
 import java.time.LocalDateTime;
 
@@ -18,4 +19,19 @@ public record ProductDetailResponse(
         String imageUrl,
         LocalDateTime createdAt
 ) {
+    // Product 엔티티를 ProductDetailResponse로 바꾸는 메서드
+    public static ProductDetailResponse from(Product product) {
+        return new ProductDetailResponse(
+                product.getId(),
+                product.getName(),
+                product.getType(),
+                product.getStatus(),
+                product.getNormalPrice(),
+                product.getSalePrice(),
+                product.getSpecialPrice(),
+                product.getStock(),
+                product.getImageUrl(),
+                product.getCreatedAt()
+        );
+    }
 }
