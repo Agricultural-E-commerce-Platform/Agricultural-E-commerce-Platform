@@ -30,9 +30,16 @@ public enum ErrorCode {
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "현재 판매 중인 상품이 아닙니다."),
+
+    PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
+    PRODUCT_SALE_ENDED(HttpStatus.CONFLICT, "판매 종료된 상품입니다."),
     // 주문
 
     // 장바구니
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 상품을 찾을 수 없습니다."),
+    INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "수량은 1개 이상이어야 합니다."),
+    OUT_OF_STOCK(HttpStatus.CONFLICT, "재고가 부족합니다."),
 
     // 쿠폰
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
