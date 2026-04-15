@@ -32,31 +32,26 @@ public class CartService {
     @Transactional
     public CartAddResponse addCart(Long userId, CartAddRequest request) {
 
-        // 1. 수량 검증
-        if (request.getQuantity() < 1) {
-            throw new CustomException(ErrorCode.INVALID_QUANTITY);
-        }
-
-        // 2. 유저 조회
+        // 유저 조회
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 3. 상품 조회
+        // 상품 조회
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         validateProductStatus(product);
 
-        // 4. 재고 검증
+        // 재고 검증
         if (request.getQuantity() > product.getStock()) {
             throw new CustomException(ErrorCode.OUT_OF_STOCK);
         }
 
-        // 5. 장바구니 조회
+        // 장바구니 조회
         Cart cart = cartRepository.findByUser(user)
                 .orElseGet(() -> cartRepository.save(Cart.create(user)));
 
-        // 6. 기존 상품 여부 확인
+        // 기존 상품 여부 확인
         CartItem cartItem = cartItemRepository.findByCartAndProduct(cart, product)
                 .orElse(null);
 
@@ -78,7 +73,7 @@ public class CartService {
             );
         }
 
-        // 7. 신규 생성
+        // 신규 생성
         CartItem newItem = CartItem.create(cart, product, product.getSalePrice(), request.getQuantity());
         cartItemRepository.save(newItem);
 
@@ -115,18 +110,9 @@ public class CartService {
     // 수량 변경
     @Transactional
     public CartUpdateResponse updateQuantity(Long cartItemId, CartUpdateRequest request, Long userId) {
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+        CartItem cartItem = cartItemRepository.findByIdAndCart_User_Id(cartItemId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        // 내 장바구니인지 검증
-        if (!cartItem.getCart().getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
-
-        // 수량 검증
-        if (request.getQuantity() < 1) {
-            throw new CustomException(ErrorCode.INVALID_QUANTITY);
-        }
 
         // 재고 초과 검증
         if (request.getQuantity() > cartItem.getProduct().getStock()) {
@@ -148,12 +134,8 @@ public class CartService {
     public void deleteCartItem(Long cartItemId, Long userId) {
 
         // 삭제 대상 조회
-        CartItem cartItem = cartItemRepository.findById(cartItemId)
+        CartItem cartItem = cartItemRepository.findByIdAndCart_User_Id(cartItemId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
-
-        if (!cartItem.getCart().getUser().getId().equals(userId)) {
-            throw new CustomException(ErrorCode.UNAUTHORIZED);
-        }
 
         // Soft Delete 실행 (JPA가 update로 변환)
         cartItemRepository.delete(cartItem);
