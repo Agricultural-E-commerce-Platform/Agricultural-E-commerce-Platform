@@ -15,7 +15,7 @@ RUN gradle assemble --no-daemon
 # ================================
 # 2단계: 실행 스테이지
 # ================================
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:17-jre-jammy
 WORKDIR /app
 
 # 빌드 스테이지에서 생성된 jar 파일만 복사
