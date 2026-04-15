@@ -55,5 +55,7 @@ jobs:
       - name: Docker 이미지 빌드 & 푸시
         if: github.ref == 'refs/heads/main'
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:${{ github.sha }} .
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:${{ github.sha }} \
+                        -t ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:${{ github.sha }}
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/agri-commerce:latest
