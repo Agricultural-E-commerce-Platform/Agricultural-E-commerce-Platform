@@ -21,4 +21,7 @@ public interface UserCouponRepository extends JpaRepository<UserCoupon, Long> {
 
     // 단건 조회 (쿠폰 사용 시)
     Optional<UserCoupon> findByIdAndUserId(Long id, Long userId);
+
+    // 사용자 보유 쿠폰 전체 조회 (만료 임박순)
+    List<UserCoupon> findByUserIdOrderByExpiredAtAsc(Long userId);
 }

@@ -4,19 +4,24 @@ import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.request.CouponCreateRequest;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponCreateResponse;
+import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponListResponse;
+import com.spartafarmer.agri_commerce.domain.coupon.dto.response.UserCouponResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.entity.Coupon;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.CouponRepository;
+import com.spartafarmer.agri_commerce.domain.coupon.repository.UserCouponRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class CouponService {
 
     private final CouponRepository couponRepository;
+    private final UserCouponRepository userCouponRepository;
 
     // 쿠폰 생성 (관리자)
     @Transactional
@@ -44,5 +49,21 @@ public class CouponService {
 
         couponRepository.save(coupon);
         return CouponCreateResponse.from(coupon);
+    }
+
+    // 쿠폰 전체 목록 조회 (관리자)
+    @Transactional(readOnly = true)
+    public List<CouponListResponse> getCoupons() {
+        return couponRepository.findAll().stream()
+                .map(CouponListResponse::from)
+                .toList();
+    }
+
+    // 내 쿠폰 목록 조회 (만료 임박순)
+    @Transactional(readOnly = true)
+    public List<UserCouponResponse> getMyCoupons(Long userId) {
+        return userCouponRepository.findByUserIdOrderByExpiredAtAsc(userId).stream()
+                .map(UserCouponResponse::from)
+                .toList();
     }
 }
