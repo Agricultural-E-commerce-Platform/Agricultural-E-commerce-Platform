@@ -23,12 +23,12 @@ public class Coupon extends BaseEntity {
     private String name;
 
     // 정액 할인 금액
-    @Column(nullable = false)
-    private Long discountPrice;
+    @Column(name = "discount_price", nullable = false)
+    private Long discountAmount;
 
     // 발급 가능 총 수량
-    @Column(nullable = false)
-    private int totalCount;
+    @Column(name = "total_count", nullable = false)
+    private int totalQuantity;
 
     // 현재 발급된 수량 (동시성 제어 대상)
     @Column(nullable = false)
@@ -42,20 +42,20 @@ public class Coupon extends BaseEntity {
     @Column(nullable = false)
     private LocalDateTime endTime;
 
-    private Coupon(String name, Long discountPrice, int totalCount,
+    private Coupon(String name, Long discountAmount, int totalQuantity,
                    LocalDateTime startTime, LocalDateTime endTime) {
         this.name = name;
-        this.discountPrice = discountPrice;
-        this.totalCount = totalCount;
+        this.discountAmount = discountAmount;
+        this.totalQuantity = totalQuantity;
         this.issuedQuantity = 0;
         this.startTime = startTime;
         this.endTime = endTime;
     }
 
     // 쿠폰 생성
-    public static Coupon create(String name, Long discountPrice, int totalCount,
+    public static Coupon create(String name, Long discountAmount, int totalQuantity,
                                 LocalDateTime startTime, LocalDateTime endTime) {
-        return new Coupon(name, discountPrice, totalCount, startTime, endTime);
+        return new Coupon(name, discountAmount, totalQuantity, startTime, endTime);
     }
 
     // 발급 수량 증가 (Redis Lock 획득 후 호출)
@@ -65,7 +65,7 @@ public class Coupon extends BaseEntity {
 
     // 잔여 수량 확인
     public boolean hasRemaining() {
-        return this.issuedQuantity < this.totalCount;
+        return this.issuedQuantity < this.totalQuantity;
     }
 
     // 발급 가능 시간 확인
