@@ -53,6 +53,9 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'        // JWT API
 	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'          // JWT 구현체 (런타임)
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'       // JWT JSON 파싱 (런타임)
+
+	// Quartz 스케줄러 의존성 추가
+	implementation 'org.springframework.boot:spring-boot-starter-quartz'
 }
 
 tasks.named('test') {
