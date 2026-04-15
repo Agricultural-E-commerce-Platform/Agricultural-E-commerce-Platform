@@ -9,6 +9,9 @@ import com.spartafarmer.agri_commerce.domain.coupon.dto.response.UserCouponRespo
 import com.spartafarmer.agri_commerce.domain.coupon.service.CouponService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -36,8 +39,9 @@ public class CouponController {
     // 쿠폰 전체 목록 조회 (관리자)
     @Secured("ROLE_ADMIN")
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CouponListResponse>>> getCoupons() {
-        return ResponseEntity.ok(ApiResponse.success(couponService.getCoupons()));
+    public ResponseEntity<ApiResponse<Page<CouponListResponse>>> getCoupons(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(couponService.getCoupons(pageable)));
     }
 
     // 내 쿠폰 목록 조회

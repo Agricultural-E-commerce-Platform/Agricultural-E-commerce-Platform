@@ -10,6 +10,8 @@ import com.spartafarmer.agri_commerce.domain.coupon.entity.Coupon;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.CouponRepository;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.UserCouponRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,10 +55,9 @@ public class CouponService {
 
     // 쿠폰 전체 목록 조회 (관리자)
     @Transactional(readOnly = true)
-    public List<CouponListResponse> getCoupons() {
-        return couponRepository.findAll().stream()
-                .map(CouponListResponse::from)
-                .toList();
+    public Page<CouponListResponse> getCoupons(Pageable pageable) {
+        return couponRepository.findAll(pageable)
+                .map(CouponListResponse::from);
     }
 
     // 내 쿠폰 목록 조회 (만료 임박순)
