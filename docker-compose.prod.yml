@@ -24,4 +24,7 @@ services:
       - "SPRING_DATA_REDIS_HOST=${REDIS_HOST}"
       - "SPRING_DATA_REDIS_PORT=${REDIS_PORT}"
 
+      # Redis 임시 비활성화 (Redis 설정 완료 후 제거)
+      - "SPRING_AUTOCONFIGURE_EXCLUDE=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration"
+
     restart: always
