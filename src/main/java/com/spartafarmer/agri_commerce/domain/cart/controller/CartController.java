@@ -4,7 +4,6 @@ import com.spartafarmer.agri_commerce.common.response.ApiResponse;
 import com.spartafarmer.agri_commerce.common.security.AuthUser;
 import com.spartafarmer.agri_commerce.domain.cart.dto.*;
 import com.spartafarmer.agri_commerce.domain.cart.service.CartService;
-import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -33,14 +32,16 @@ public class CartController {
 
     // 수량 변경
     @PatchMapping("/{cartItemId}")
-    public ApiResponse<CartUpdateResponse> updateQuantity(@PathVariable Long cartItemId, @RequestBody CartUpdateRequest request) {
-        return ApiResponse.success(200, "장바구니 수량 변경 성공", cartService.updateQuantity(cartItemId, request));
+    public ApiResponse<CartUpdateResponse> updateQuantity(@PathVariable Long cartItemId,
+                                                          @Valid @RequestBody CartUpdateRequest request,
+                                                          @AuthenticationPrincipal AuthUser authUser) {
+        return ApiResponse.success(200, "장바구니 수량 변경 성공", cartService.updateQuantity(cartItemId, request, authUser.getId()));
     }
 
     // 장바구니 삭제 (소프트 딜리트)
     @PatchMapping("/items/{cartItemId}")
-    public ApiResponse<Void> deleteCartItem(@PathVariable Long cartItemId) {
-        cartService.deleteCartItem(cartItemId);
+    public ApiResponse<Void> deleteCartItem(@PathVariable Long cartItemId, @AuthenticationPrincipal AuthUser authUser) {
+        cartService.deleteCartItem(cartItemId, authUser.getId());
         return ApiResponse.success(200, "장바구니 상품 삭제 성공", null);
     }
 

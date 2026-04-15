@@ -1,10 +1,9 @@
 package com.spartafarmer.agri_commerce.domain.cart.dto;
 
-
-// 수량 변경 dto
-
 import jakarta.validation.constraints.Min;
 import lombok.Getter;
+
+// 수량 변경 dto
 
 @Getter
 public class CartUpdateRequest {

@@ -26,7 +26,7 @@ public class Cart extends BaseEntity {
     private User user;
 
     @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     private List<CartItem> cartItems = new ArrayList<>();
 
     private Cart(User user) {
