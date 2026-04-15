@@ -18,7 +18,7 @@ public class UserCouponResponse {
     private UserCouponResponse(UserCoupon userCoupon) {
         this.userCouponId = userCoupon.getId();
         this.couponName = userCoupon.getCoupon().getName();
-        this.discountAmount = userCoupon.getCoupon().getDiscountPrice();
+        this.discountAmount = userCoupon.getCoupon().getDiscountAmount();
         this.expiredAt = userCoupon.getExpiredAt();
         this.status = userCoupon.getStatus();
     }

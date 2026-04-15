@@ -19,8 +19,8 @@ public class CouponListResponse {
     private CouponListResponse(Coupon coupon) {
         this.couponId = coupon.getId();
         this.name = coupon.getName();
-        this.discountAmount = coupon.getDiscountPrice();
-        this.totalQuantity = coupon.getTotalCount();
+        this.discountAmount = coupon.getDiscountAmount();
+        this.totalQuantity = coupon.getTotalQuantity();
         this.issuedQuantity = coupon.getIssuedQuantity();
         this.startTime = coupon.getStartTime();
         this.endTime = coupon.getEndTime();
