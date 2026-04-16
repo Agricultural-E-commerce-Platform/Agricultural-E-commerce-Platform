@@ -52,7 +52,9 @@ public class ProductService {
 
     // 상품 상세 조회
     public ProductDetailResponse getProduct(Long productId) {
-        Product product = productRepository.findByIdOrThrow(productId); // 공통 조회 메서드 사용
+        // Service 계층에서 직접 예외 처리 로직을 작성
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 특가 상품이고 아직 시작 전이면 상세 조회 불가
         if (product.getType() == ProductType.SPECIAL &&
@@ -65,7 +67,7 @@ public class ProductService {
 
     // 검색 API
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
-        return productRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable)
+        return productRepository.findByNameContainingOrderByCreatedAtDesc(keyword, pageable)
                 .map(ProductListResponse::from); // 검색 결과를 DTO로 변환해서 반환
     }
 }

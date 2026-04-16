@@ -1,4 +1,4 @@
-package com.spartafarmer.agri_commerce.domain.product.scheduler;
+package com.spartafarmer.agri_commerce.domain.product.service;
 
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
@@ -37,7 +37,7 @@ public class TimeSaleScheduleService {
 
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity("trigger-" + jobName)
-                    .startAt(Date.from(scheduleTime.atZone(ZoneId.of("Asia/Seoul")).toInstant())) // KST 기준으로 예약 시각 지정
+                    .startAt(Date.from(scheduleTime.atZone(ZoneId.systemDefault()).toInstant())) // 서버 기본 시간대 기준으로 예약 시각 지정
                     .build();
 
             scheduler.scheduleJob(jobDetail, trigger); // Quartz Job 예약

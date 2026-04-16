@@ -8,14 +8,12 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 @Slf4j
-@RequiredArgsConstructor
 public class TimeSaleStartJob implements Job {
-
-    private final TimeSaleService timeSaleService;
-
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        Long productId = context.getMergedJobDataMap().getLong("productId"); // 예약할 때 넣어둔 상품 ID
+        // Spring Bean 컨텍스트에서 직접 꺼내서 사용
+        TimeSaleService timeSaleService = (TimeSaleService) context.getJobDetail().getJobDataMap().get("timeSaleService");
+        Long productId = context.getMergedJobDataMap().getLong("productId");
 
         try {
             timeSaleService.startProductSale(productId); // 실제 DB 상태 변경은 서비스에서 처리

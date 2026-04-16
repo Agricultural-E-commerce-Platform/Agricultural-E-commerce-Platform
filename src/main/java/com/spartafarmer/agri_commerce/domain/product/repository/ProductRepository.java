@@ -29,16 +29,13 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
             Pageable pageable
     );
 
-    // 상품명에 keyword가 포함된 상품을 대소문자 구분 없이 최신순으로 조회
-    Page<Product> findByNameContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
+    // 상품명에 keyword가 포함된 상품을 최신순으로 조회
+    Page<Product> findByNameContainingOrderByCreatedAtDesc(String keyword, Pageable pageable);
 
     // 타임세일 상태 변경 시 비관적 락을 적용하여 상품 조회
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :productId")
     Optional<Product> findByIdWithLock(@Param("productId") Long productId);
 
-    // 공통 조회 메서드
-    default Product findByIdOrThrow(Long id) {
-        return findById(id).orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
-    }
+
 }
