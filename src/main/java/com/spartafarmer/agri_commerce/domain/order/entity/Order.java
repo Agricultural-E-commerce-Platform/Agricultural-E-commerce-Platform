@@ -21,7 +21,7 @@ public class Order extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     // 쿠폰 미적용시 null 허용
@@ -51,8 +51,7 @@ public class Order extends BaseEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
-    // 주문 생성 (성공한 경우만 생성됨)
-    // 실패 - DB 저장 안됨, 성공시 COMPLETED만 존재
+    // 주문 생성
     public static Order create(User user, UserCoupon coupon,
                                Long totalPrice, Long discountPrice, Long finalPrice) {
 
@@ -65,6 +64,22 @@ public class Order extends BaseEntity {
         order.status = OrderStatus.COMPLETED;
         return order;
     }
+
+    // 주문 실패
+    public static Order fail(User user,
+                             UserCoupon coupon,
+                             Long totalPrice) {
+
+        Order order = new Order();
+        order.user = user;
+        order.coupon = coupon;
+        order.totalPrice = totalPrice;
+        order.discountPrice = 0L;
+        order.finalPrice = totalPrice;
+        order.status = OrderStatus.FAILED;
+        return order;
+    }
+
 
     // 주문에 상품을 포함시키기 위한 메서드 (양방향 관계 동기화)
     public void addOrderItem(OrderItem orderItem) {
