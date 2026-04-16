@@ -120,4 +120,20 @@ public class Product {
             throw new CustomException(ErrorCode.OUT_OF_STOCK);
         }
     }
+
+    // 상품 생성 (더미데이터용)
+    public static Product create(String name, ProductType type,
+                                 Long normalPrice, Long salePrice, Long specialPrice,
+                                 Integer stock, ProductStatus status, String imageUrl) {
+        Product product = new Product();
+        product.name = name;
+        product.type = type;
+        product.normalPrice = normalPrice;
+        product.salePrice = salePrice;
+        product.specialPrice = specialPrice;
+        product.stock = stock;
+        product.status = status;
+        product.imageUrl = imageUrl;
+        return product;
+    }
 }
