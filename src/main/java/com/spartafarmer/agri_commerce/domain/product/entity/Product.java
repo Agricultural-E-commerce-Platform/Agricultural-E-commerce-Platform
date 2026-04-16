@@ -2,6 +2,8 @@ package com.spartafarmer.agri_commerce.domain.product.entity;
 
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
+import com.spartafarmer.agri_commerce.common.exception.CustomException;
+import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -61,5 +63,25 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    
+    // 재고 차감
+    public void decreaseStock(int quantity) {
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.OUT_OF_STOCK);
+        }
+        this.stock -= quantity;
+    }
+
+    public void validateOrderable(int quantity) {
+        if (this.status == ProductStatus.SOLD_OUT) {
+            throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
+        }
+
+        if (this.status == ProductStatus.SALE_ENDED) {
+            throw new CustomException(ErrorCode.PRODUCT_SALE_ENDED);
+        }
+
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.OUT_OF_STOCK);
+        }
+    }
 }

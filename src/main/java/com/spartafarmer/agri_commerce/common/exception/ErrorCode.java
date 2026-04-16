@@ -34,6 +34,10 @@ public enum ErrorCode {
     PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
     PRODUCT_SALE_ENDED(HttpStatus.CONFLICT, "판매 종료된 상품입니다."),
     // 주문
+    CART_EMPTY(HttpStatus.BAD_REQUEST, "장바구니가 비어있습니다."),
+    MIN_ORDER_AMOUNT_NOT_MET(HttpStatus.BAD_REQUEST, "최소 주문 금액은 20,000원 이상입니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),
+    ORDER_LOCK_FAILED(HttpStatus.TOO_MANY_REQUESTS, "현재 요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요."),
 
     // 장바구니
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
