@@ -33,6 +33,7 @@ public enum ErrorCode {
 
     PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
     PRODUCT_SALE_ENDED(HttpStatus.CONFLICT, "판매 종료된 상품입니다."),
+    PRODUCT_SALE_NOT_STARTED(HttpStatus.BAD_REQUEST, "아직 판매 시작 전인 상품입니다."),
     // 주문
 
     // 장바구니
