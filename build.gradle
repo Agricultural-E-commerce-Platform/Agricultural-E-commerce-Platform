@@ -56,7 +56,6 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz' // 타임세일 시작/종료 예약 실행
 	implementation 'org.springframework.retry:spring-retry' // 낙관적 락 충돌 시 재시도 처리
-	implementation 'org.springframework.boot:spring-boot-starter-aop' // Retry AOP 적용
 }
 
 tasks.named('test') {

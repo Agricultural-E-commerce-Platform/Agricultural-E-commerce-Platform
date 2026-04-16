@@ -19,8 +19,9 @@ public class TimeSaleEndJob implements Job {
         try {
             timeSaleService.endProductSale(productId); // 실제 DB 상태 변경은 서비스에서 처리
         } catch (Exception e) {
-            log.error("타임세일 종료 처리 실패. productId={}", productId, e); // 실패 로그 남김
-            throw e; // 실패를 Quartz에 전달
+            log.error("타임세일 종료 처리 실패. productId={}", productId, e); // 실패 로그만 남김
+            // Quartz에 예외를 다시 던지지 않음
+            // 운영 환경에서는 여기서 관리자 알림/실패 이력 적재 확장 가능
         }
     }
 }

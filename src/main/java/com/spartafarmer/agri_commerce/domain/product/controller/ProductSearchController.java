@@ -28,10 +28,6 @@ public class ProductSearchController {
             @RequestParam @Size(min = 1, max = 50) String keyword, // 검색어 길이 제한
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        if (pageable.getPageSize() > 100) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST); // 과도한 페이지 크기 방지
-        }
-
         return productService.searchProducts(keyword, pageable); // 검색 서비스 호출
     }
 }

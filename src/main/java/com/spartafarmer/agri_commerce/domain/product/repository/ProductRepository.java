@@ -14,8 +14,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
-import java.util.Optional;
-
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 전체 상품 최신순 조회
@@ -34,8 +32,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 상품명에 keyword가 포함된 상품을 대소문자 구분 없이 최신순으로 조회
     Page<Product> findByNameContainingIgnoreCaseOrderByCreatedAtDesc(String keyword, Pageable pageable);
 
-    // 낙관적 락을 적용해 상품 조회
-    @Lock(LockModeType.OPTIMISTIC)
+    // 타임세일 상태 변경 시 비관적 락을 적용하여 상품 조회
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :productId")
     Optional<Product> findByIdWithLock(@Param("productId") Long productId);
 
