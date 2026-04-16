@@ -7,13 +7,16 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+
 @Slf4j
+@RequiredArgsConstructor
 public class TimeSaleStartJob implements Job {
+
+    private final TimeSaleService timeSaleService; // SpringBeanJobFactory가 주입
+
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        // Spring Bean 컨텍스트에서 직접 꺼내서 사용
-        TimeSaleService timeSaleService = (TimeSaleService) context.getJobDetail().getJobDataMap().get("timeSaleService");
-        Long productId = context.getMergedJobDataMap().getLong("productId");
+        Long productId = context.getMergedJobDataMap().getLong("productId"); // JobDataMap에서는 productId만 꺼냄
 
         try {
             timeSaleService.startProductSale(productId); // 실제 DB 상태 변경은 서비스에서 처리

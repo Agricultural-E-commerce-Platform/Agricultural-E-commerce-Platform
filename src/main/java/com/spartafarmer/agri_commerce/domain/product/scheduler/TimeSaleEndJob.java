@@ -11,11 +11,11 @@ import org.quartz.JobExecutionException;
 @RequiredArgsConstructor
 public class TimeSaleEndJob implements Job {
 
-    private final TimeSaleService timeSaleService;
+    private final TimeSaleService timeSaleService; // SpringBeanJobFactory가 주입
 
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
-        Long productId = context.getMergedJobDataMap().getLong("productId"); // 예약할 때 넣어둔 상품 ID
+        Long productId = context.getMergedJobDataMap().getLong("productId"); // JobDataMap에서는 productId만 꺼냄
 
         try {
             timeSaleService.endProductSale(productId); // 실제 DB 상태 변경은 서비스에서 처리

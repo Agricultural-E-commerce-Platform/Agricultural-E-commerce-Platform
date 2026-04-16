@@ -28,16 +28,16 @@ public class TimeSaleScheduleService {
             }
 
             JobDataMap jobDataMap = new JobDataMap();
-            jobDataMap.put("productId", productId.longValue()); // primitive long 값으로 저장
+            jobDataMap.put("productId", productId.longValue()); // primitive long 값만 저장
 
             JobDetail jobDetail = JobBuilder.newJob(jobClass)
                     .withIdentity(jobName)
-                    .usingJobData(jobDataMap)
+                    .usingJobData(jobDataMap) // JobDataMap에는 productId만 넣음
                     .build();
 
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity("trigger-" + jobName)
-                    .startAt(Date.from(scheduleTime.atZone(ZoneId.systemDefault()).toInstant())) // 서버 기본 시간대 기준으로 예약 시각 지정
+                    .startAt(Date.from(scheduleTime.atZone(ZoneId.systemDefault()).toInstant())) // 서버 기본 시간대 기준으로 예약
                     .build();
 
             scheduler.scheduleJob(jobDetail, trigger); // Quartz Job 예약
