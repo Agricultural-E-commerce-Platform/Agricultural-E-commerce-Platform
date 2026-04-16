@@ -21,7 +21,7 @@ public class TimeSaleScheduleService {
             String jobName = jobClass.getSimpleName() + "-" + productId; // Job 클래스명과 상품 ID를 조합한 이름
 
             JobDataMap jobDataMap = new JobDataMap();
-            jobDataMap.put("productId", productId.longValue()); // Quartz JobDataMap에는 primitive long 값으로 저장
+            jobDataMap.put("productId", productId.longValue()); // primitive long 값으로 저장
 
             JobDetail jobDetail = JobBuilder.newJob(jobClass)
                     .withIdentity(jobName)

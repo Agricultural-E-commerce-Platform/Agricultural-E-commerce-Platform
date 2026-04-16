@@ -1,7 +1,10 @@
 package com.spartafarmer.agri_commerce.domain.product.controller;
 
+import com.spartafarmer.agri_commerce.common.exception.CustomException;
+import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.service.ProductService;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,9 +23,13 @@ public class ProductSearchController {
 
     @GetMapping("/search")
     public Page<ProductListResponse> searchProducts(
-            @RequestParam String keyword,                  // 검색어
-            @PageableDefault(size = 10) Pageable pageable // 기본 10개씩 조회
+            @RequestParam @Size(min = 1, max = 50) String keyword, // 검색어 길이 제한
+            @PageableDefault(size = 10) Pageable pageable
     ) {
+        if (pageable.getPageSize() > 100) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST); // 과도한 페이지 크기 방지
+        }
+
         return productService.searchProducts(keyword, pageable); // 검색 서비스 호출
     }
 }

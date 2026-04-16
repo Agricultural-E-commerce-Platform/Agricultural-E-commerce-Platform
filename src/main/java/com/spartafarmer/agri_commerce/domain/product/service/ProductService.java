@@ -47,8 +47,7 @@ public class ProductService {
             products = productRepository.findByTypeOrderByCreatedAtDesc(type, pageable);
         }
 
-        // 응답 DTO로 변환
-        return products.map(ProductListResponse::from);
+        return products.map(ProductListResponse::from); // 응답 DTO로 변환
     }
 
     // 상품 상세 조회
@@ -59,7 +58,7 @@ public class ProductService {
         // 특가 상품이고 아직 시작 전이면 상세 조회 불가
         if (product.getType() == ProductType.SPECIAL &&
                 product.getStatus() == ProductStatus.READY) {
-            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+            throw new CustomException(ErrorCode.PRODUCT_SALE_NOT_STARTED); // 판매 시작 전 상품 예외
         }
 
         return ProductDetailResponse.from(product); // 판매 종료 상품은 상세 조회 가능
@@ -67,7 +66,11 @@ public class ProductService {
 
     // 검색 API
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
-        return productRepository.findByNameContainingOrderByCreatedAtDesc(keyword, pageable)
+        if (keyword == null || keyword.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST); // 빈 검색어 방지
+        }
+
+        return productRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable)
                 .map(ProductListResponse::from); // 검색 결과를 DTO로 변환해서 반환
     }
 }
