@@ -61,9 +61,6 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Version
-    private Long version; // 낙관적 락용 버전 필드
-
     // 특가 시작 시간
     @Column(name = "sale_start_time")
     private LocalDateTime saleStartTime;
@@ -72,8 +69,11 @@ public class Product {
     @Column(name = "sale_end_time")
     private LocalDateTime saleEndTime;
 
+    @Version
+    private Long version; // 낙관적 락용 버전 필드
+
     public void prepareSale() {
-        this.status = ProductStatus.READY; // 특가 시작 전 상태로 준비
+        this.status = ProductStatus.READY; // 특가 상품을 시작 전 상태로 준비
     }
 
     public void startSale() {

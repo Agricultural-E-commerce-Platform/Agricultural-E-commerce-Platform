@@ -3,6 +3,7 @@ package com.spartafarmer.agri_commerce.domain.product.scheduler;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.quartz.*;
 import org.springframework.stereotype.Service;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TimeSaleScheduleService {
@@ -20,12 +22,17 @@ public class TimeSaleScheduleService {
         try {
             String jobName = jobClass.getSimpleName() + "-" + productId; // Job 클래스명과 상품 ID를 조합한 이름
 
+            if (scheduler.checkExists(JobKey.jobKey(jobName))) {
+                log.warn("이미 등록된 Quartz Job입니다. jobName={}, productId={}", jobName, productId);
+                return; // 이미 등록된 경우 중복 등록 방지
+            }
+
             JobDataMap jobDataMap = new JobDataMap();
             jobDataMap.put("productId", productId.longValue()); // primitive long 값으로 저장
 
             JobDetail jobDetail = JobBuilder.newJob(jobClass)
                     .withIdentity(jobName)
-                    .usingJobData(jobDataMap) // Job 실행 시 사용할 데이터 등록
+                    .usingJobData(jobDataMap)
                     .build();
 
             Trigger trigger = TriggerBuilder.newTrigger()
@@ -35,7 +42,8 @@ public class TimeSaleScheduleService {
 
             scheduler.scheduleJob(jobDetail, trigger); // Quartz Job 예약
         } catch (SchedulerException e) {
-            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR); // Quartz 예약 실패 시 공통 예외 처리
+            log.error("Quartz 스케줄 등록 실패. productId={}", productId, e);
+            throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
         }
     }
 }

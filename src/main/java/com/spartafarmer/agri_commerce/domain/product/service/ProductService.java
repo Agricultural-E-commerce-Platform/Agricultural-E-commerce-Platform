@@ -52,8 +52,7 @@ public class ProductService {
 
     // 상품 상세 조회
     public ProductDetailResponse getProduct(Long productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)); // 상품이 없으면 예외
+        Product product = productRepository.findByIdOrThrow(productId); // 공통 조회 메서드 사용
 
         // 특가 상품이고 아직 시작 전이면 상세 조회 불가
         if (product.getType() == ProductType.SPECIAL &&
