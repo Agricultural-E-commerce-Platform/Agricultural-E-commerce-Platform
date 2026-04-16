@@ -22,17 +22,24 @@ public enum ErrorCode {
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
     USER_DUPLICATE_EMAIL(HttpStatus.CONFLICT, "중복된 이메일입니다."),
     USER_INVALID_LOGIN(HttpStatus.BAD_REQUEST, "이메일 또는 비밀번호가 틀렸습니다."),
-    USER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호 형식이 올바르지 않습니다. (영문, 숫자 포함 8자리 이상)"),
+    USER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호는 영문, 숫자 포함 8~12자리여야 합니다."),
     USER_INVALID_EMAIL(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
-    USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다."),
+    USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx)"),
     USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
 
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "현재 판매 중인 상품이 아닙니다."),
+
+    PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
+    PRODUCT_SALE_ENDED(HttpStatus.CONFLICT, "판매 종료된 상품입니다."),
     // 주문
 
     // 장바구니
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 상품을 찾을 수 없습니다."),
+    INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "수량은 1개 이상이어야 합니다."),
+    OUT_OF_STOCK(HttpStatus.CONFLICT, "재고가 부족합니다."),
 
     // 쿠폰
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),
@@ -43,7 +50,9 @@ public enum ErrorCode {
     USER_COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "보유한 쿠폰을 찾을 수 없습니다."),
     USER_COUPON_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 쿠폰입니다."),
     USER_COUPON_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 쿠폰입니다."),
-    COUPON_NOT_APPLICABLE(HttpStatus.BAD_REQUEST, "특가 상품이 포함된 주문에는 쿠폰을 사용할 수 없습니다.");
+    COUPON_NOT_APPLICABLE(HttpStatus.BAD_REQUEST, "특가 상품이 포함된 주문에는 쿠폰을 사용할 수 없습니다."),
+    INVALID_COUPON_START_TIME(HttpStatus.BAD_REQUEST, "시작 시각은 현재 시각 이후여야 합니다."),
+    INVALID_COUPON_END_TIME(HttpStatus.BAD_REQUEST, "종료 시각은 시작 시각보다 이후여야 합니다.");
 
     // 이 코드 위쪽에 에러 코드 작성
     private final HttpStatus status;
