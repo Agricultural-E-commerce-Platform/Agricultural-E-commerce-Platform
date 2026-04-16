@@ -2,6 +2,8 @@ package com.spartafarmer.agri_commerce.domain.product.entity;
 
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
+import com.spartafarmer.agri_commerce.common.exception.CustomException;
+import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -86,5 +88,36 @@ public class Product {
 
     public void endSale() {
         this.status = ProductStatus.SALE_ENDED; // 판매 종료 상태로 변경
+    }
+
+    // 재고 차감
+    public void decreaseStock(int quantity) {
+        // 먼저 주문 가능한 상태인지 + 재고는 충분한지 통합 검증
+        validateOrderable(quantity);
+
+        this.stock -= quantity;
+
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
+    }
+
+    // 상품 상태 체크
+    public void validateOrderable(int quantity) {
+        if (this.status == ProductStatus.READY) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
+        if (this.status == ProductStatus.SOLD_OUT) {
+            throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
+        }
+
+        if (this.status == ProductStatus.SALE_ENDED) {
+            throw new CustomException(ErrorCode.PRODUCT_SALE_ENDED);
+        }
+
+        if (this.stock < quantity) {
+            throw new CustomException(ErrorCode.OUT_OF_STOCK);
+        }
     }
 }
