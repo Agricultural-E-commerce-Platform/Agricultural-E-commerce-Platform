@@ -65,8 +65,8 @@ public class ProductService {
         return ProductDetailResponse.from(product); // 판매 종료 상품은 상세 조회 가능
     }
 
-    // 검색 API v1
-    public Page<ProductListResponse> searchProductsV1 (String keyword, Pageable pageable){
+    // 검색 API
+    public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
         return productRepository.findByNameContainingOrderByCreatedAtDesc(keyword, pageable)
                 .map(ProductListResponse::from); // 검색 결과를 DTO로 변환해서 반환
     }

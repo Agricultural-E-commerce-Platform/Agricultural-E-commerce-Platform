@@ -19,10 +19,10 @@ public class ProductSearchController {
     private final ProductService productService;
 
     @GetMapping("/search")
-    public Page<ProductListResponse> searchProductsV1(
-            @RequestParam String keyword,                 // 검색어
+    public Page<ProductListResponse> searchProducts(
+            @RequestParam String keyword,                  // 검색어
             @PageableDefault(size = 10) Pageable pageable // 기본 10개씩 조회
     ) {
-        return productService.searchProductsV1(keyword, pageable); // 검색 서비스 호출
+        return productService.searchProducts(keyword, pageable); // 검색 서비스 호출
     }
 }

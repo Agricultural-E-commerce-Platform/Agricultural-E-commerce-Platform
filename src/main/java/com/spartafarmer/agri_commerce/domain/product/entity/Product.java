@@ -61,6 +61,9 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Version
+    private Long version; // 낙관적 락용 버전 필드
+
     // 특가 시작 시간
     @Column(name = "sale_start_time")
     private LocalDateTime saleStartTime;
