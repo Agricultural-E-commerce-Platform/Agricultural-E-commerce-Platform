@@ -61,5 +61,20 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    
+    // 상품 생성 (더미데이터용)
+    public static Product create(String name, ProductType type,
+                                 Long normalPrice, Long salePrice, Long specialPrice,
+                                 Integer stock, ProductStatus status, String imageUrl) {
+        Product product = new Product();
+        product.name = name;
+        product.type = type;
+        product.normalPrice = normalPrice;
+        product.salePrice = salePrice;
+        product.specialPrice = specialPrice;
+        product.stock = stock;
+        product.status = status;
+        product.imageUrl = imageUrl;
+        return product;
+    }
+
 }
