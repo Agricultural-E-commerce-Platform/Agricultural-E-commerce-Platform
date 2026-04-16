@@ -65,10 +65,6 @@ public class ProductService {
 
     // 검색 API
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
-        if (keyword == null || keyword.isBlank()) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST); // 빈 검색어 방지
-        }
-
         return productRepository.findByNameContainingIgnoreCaseOrderByCreatedAtDesc(keyword, pageable)
                 .map(ProductListResponse::from); // 검색 결과를 DTO로 변환해서 반환
     }

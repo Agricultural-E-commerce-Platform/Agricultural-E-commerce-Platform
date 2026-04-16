@@ -55,7 +55,7 @@ dependencies {
 	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'       // JWT JSON 파싱 (런타임)
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz' // 타임세일 시작/종료 예약 실행
-	implementation 'org.springframework.retry:spring-retry' // 낙관적 락 충돌 시 재시도 처리
+	implementation 'org.springframework.boot:spring-boot-starter-validation' // 검색 파라미터 검증
 }
 
 tasks.named('test') {

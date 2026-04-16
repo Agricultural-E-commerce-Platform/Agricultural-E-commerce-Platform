@@ -37,7 +37,7 @@ public class TimeSaleScheduleService {
 
             Trigger trigger = TriggerBuilder.newTrigger()
                     .withIdentity("trigger-" + jobName)
-                    .startAt(Date.from(scheduleTime.atZone(ZoneId.systemDefault()).toInstant())) // 예약 시각에 실행
+                    .startAt(Date.from(scheduleTime.atZone(ZoneId.of("Asia/Seoul")).toInstant())) // KST 기준으로 예약 시각 지정
                     .build();
 
             scheduler.scheduleJob(jobDetail, trigger); // Quartz Job 예약
