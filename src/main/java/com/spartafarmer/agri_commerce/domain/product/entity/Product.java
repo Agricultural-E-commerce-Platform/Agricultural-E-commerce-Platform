@@ -61,5 +61,15 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    
+    // 특가 시작 시간
+    @Column(name = "sale_start_time")
+    private LocalDateTime saleStartTime;
+
+    // 특가 종료 시간
+    @Column(name = "sale_end_time")
+    private LocalDateTime saleEndTime;
+
+    public void changeStatus(ProductStatus status) {
+        this.status = status; //
+    }
 }
