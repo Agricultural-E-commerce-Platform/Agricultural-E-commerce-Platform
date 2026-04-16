@@ -20,9 +20,12 @@ public class TimeSaleScheduleService {
         try {
             String jobName = jobClass.getSimpleName() + "-" + productId; // Job 클래스명과 상품 ID를 조합한 이름
 
+            JobDataMap jobDataMap = new JobDataMap();
+            jobDataMap.put("productId", productId.longValue()); // Quartz JobDataMap에는 primitive long 값으로 저장
+
             JobDetail jobDetail = JobBuilder.newJob(jobClass)
                     .withIdentity(jobName)
-                    .usingJobData("productId", productId) // Job 실행 시 사용할 상품 ID
+                    .usingJobData(jobDataMap) // Job 실행 시 사용할 데이터 등록
                     .build();
 
             Trigger trigger = TriggerBuilder.newTrigger()

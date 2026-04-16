@@ -15,6 +15,6 @@ public class TimeSaleStartJob implements Job {
     @Override
     public void execute(JobExecutionContext context) {
         Long productId = context.getMergedJobDataMap().getLong("productId"); // 예약할 때 넣어둔 상품 ID
-        timeSaleService.startProductSale(productId); // 실제 상태 변경은 트랜잭션 서비스에서 처리
+        timeSaleService.startProductSale(productId); // 실제 DB 상태 변경은 서비스에서 처리
     }
 }

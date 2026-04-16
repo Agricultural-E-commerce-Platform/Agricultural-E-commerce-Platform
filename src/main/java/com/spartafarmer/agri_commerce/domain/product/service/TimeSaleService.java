@@ -1,6 +1,5 @@
 package com.spartafarmer.agri_commerce.domain.product.service;
 
-import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
@@ -8,6 +7,7 @@ import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepositor
 import lombok.RequiredArgsConstructor;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,11 +28,7 @@ public class TimeSaleService {
         Product product = productRepository.findWithLockById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)); // 상품이 없으면 예외
 
-        if (product.getStock() == 0) {
-            product.changeStatus(ProductStatus.SOLD_OUT); // 시작 시점에 재고가 없으면 품절 처리
-        } else {
-            product.changeStatus(ProductStatus.ON_SALE); // 시작 시간이 되면 판매중으로 변경
-        }
+        product.startSale(); // 엔티티 스스로 판매 시작 규칙 처리
     }
 
     @Transactional
@@ -45,6 +41,20 @@ public class TimeSaleService {
         Product product = productRepository.findWithLockById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)); // 상품이 없으면 예외
 
-        product.changeStatus(ProductStatus.SALE_ENDED); // 종료 시간이 되면 판매 종료 상태로 변경
+        product.endSale(); // 엔티티 스스로 판매 종료 규칙 처리
+    }
+
+    @Recover
+    public void recover(ObjectOptimisticLockingFailureException e, Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND)); // 상품이 없으면 예외
+
+        // 이미 다른 트랜잭션이 정상적으로 상태를 바꿨다면 추가 처리 없이 종료
+        // 여전히 상태가 기대와 다르면 서버 오류로 처리
+        if (product.getStatus() != null) {
+            return;
+        }
+
+        throw new CustomException(ErrorCode.INTERNAL_SERVER_ERROR);
     }
 }

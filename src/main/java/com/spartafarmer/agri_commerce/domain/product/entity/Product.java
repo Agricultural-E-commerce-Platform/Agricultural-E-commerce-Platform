@@ -72,7 +72,19 @@ public class Product {
     @Column(name = "sale_end_time")
     private LocalDateTime saleEndTime;
 
-    public void changeStatus(ProductStatus status) {
-        this.status = status; //
+    public void prepareSale() {
+        this.status = ProductStatus.READY; // 특가 시작 전 상태로 준비
+    }
+
+    public void startSale() {
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT; // 재고가 없으면 품절 처리
+        } else {
+            this.status = ProductStatus.ON_SALE; // 재고가 있으면 판매중으로 변경
+        }
+    }
+
+    public void endSale() {
+        this.status = ProductStatus.SALE_ENDED; // 판매 종료 상태로 변경
     }
 }
