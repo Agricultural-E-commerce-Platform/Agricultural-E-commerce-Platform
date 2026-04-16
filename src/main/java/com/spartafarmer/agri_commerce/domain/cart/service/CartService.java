@@ -40,12 +40,7 @@ public class CartService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        validateProductStatus(product);
-
-        // 재고 검증
-        if (request.getQuantity() > product.getStock()) {
-            throw new CustomException(ErrorCode.OUT_OF_STOCK);
-        }
+        product.validateOrderable(request.getQuantity());
 
         // 장바구니 조회
         Cart cart = cartRepository.findByUser(user)

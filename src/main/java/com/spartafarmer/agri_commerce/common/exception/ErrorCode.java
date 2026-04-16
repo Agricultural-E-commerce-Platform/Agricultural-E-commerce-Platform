@@ -33,6 +33,7 @@ public enum ErrorCode {
 
     PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
     PRODUCT_SALE_ENDED(HttpStatus.CONFLICT, "판매 종료된 상품입니다."),
+    PRODUCT_SALE_NOT_STARTED(HttpStatus.BAD_REQUEST, "아직 판매 시작 전인 상품입니다."),
     // 주문
     CART_EMPTY(HttpStatus.BAD_REQUEST, "장바구니가 비어있습니다."),
     MIN_ORDER_AMOUNT_NOT_MET(HttpStatus.BAD_REQUEST, "최소 주문 금액은 20,000원 이상입니다."),

@@ -63,15 +63,51 @@ public class Product {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    // 재고 차감
-    public void decreaseStock(int quantity) {
-        if (this.stock < quantity) {
-            throw new CustomException(ErrorCode.OUT_OF_STOCK);
-        }
-        this.stock -= quantity;
+    // 특가 시작 시간
+    @Column(name = "sale_start_time")
+    private LocalDateTime saleStartTime;
+
+    // 특가 종료 시간
+    @Column(name = "sale_end_time")
+    private LocalDateTime saleEndTime;
+
+    @Version
+    private Long version; // 낙관적 락용 버전 필드
+
+    public void prepareSale() {
+        this.status = ProductStatus.READY; // 특가 상품을 시작 전 상태로 준비
     }
 
+    public void startSale() {
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT; // 재고가 없으면 품절 처리
+        } else {
+            this.status = ProductStatus.ON_SALE; // 재고가 있으면 판매중으로 변경
+        }
+    }
+
+    public void endSale() {
+        this.status = ProductStatus.SALE_ENDED; // 판매 종료 상태로 변경
+    }
+
+    // 재고 차감
+    public void decreaseStock(int quantity) {
+        // 먼저 주문 가능한 상태인지 + 재고는 충분한지 통합 검증
+        validateOrderable(quantity);
+
+        this.stock -= quantity;
+
+        if (this.stock == 0) {
+            this.status = ProductStatus.SOLD_OUT;
+        }
+    }
+
+    // 상품 상태 체크
     public void validateOrderable(int quantity) {
+        if (this.status == ProductStatus.READY) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+
         if (this.status == ProductStatus.SOLD_OUT) {
             throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
         }
