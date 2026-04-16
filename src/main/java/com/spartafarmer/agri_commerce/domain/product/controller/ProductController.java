@@ -17,7 +17,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    // 상품 목록 조회
+    // 상품 목록 조회 + 특가 상품 조회
     @GetMapping
     public Page<ProductListResponse> getProducts(
             @RequestParam(required = false) ProductType type,
@@ -31,4 +31,5 @@ public class ProductController {
     public ProductDetailResponse getProduct(@PathVariable Long productId) {
         return productService.getProduct(productId);
     }
+
 }
