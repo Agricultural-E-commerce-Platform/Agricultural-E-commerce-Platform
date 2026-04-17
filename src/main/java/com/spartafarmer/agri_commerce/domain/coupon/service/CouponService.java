@@ -4,11 +4,15 @@ import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.request.CouponCreateRequest;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponCreateResponse;
+import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponIssueResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponListResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.UserCouponResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.entity.Coupon;
+import com.spartafarmer.agri_commerce.domain.coupon.entity.UserCoupon;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.CouponRepository;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.UserCouponRepository;
+import com.spartafarmer.agri_commerce.domain.user.entity.User;
+import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +28,7 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
+    private final UserRepository userRepository;
 
     // 쿠폰 생성 (관리자)
     @Transactional
@@ -67,4 +72,40 @@ public class CouponService {
                 .map(UserCouponResponse::from)
                 .toList();
     }
+
+    @Transactional
+    public CouponIssueResponse issueCoupon(Long couponId, Long userId) {
+
+        // 쿠폰 조회
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
+
+        // 발급 기간 검증
+        if (!coupon.isAvailableNow(LocalDateTime.now())) {
+            throw new CustomException(ErrorCode.COUPON_NOT_AVAILABLE_TIME);
+        }
+
+        // 중복 발급 검증
+        if (userCouponRepository.existsByUserIdAndCouponId(userId, couponId)) {
+            throw new CustomException(ErrorCode.COUPON_ALREADY_ISSUED);
+        }
+
+        // 수량 검증
+        if (!coupon.hasRemaining()) {
+            throw new CustomException(ErrorCode.COUPON_SOLD_OUT);
+        }
+
+        // 발급 수량 증가
+        coupon.increaseIssuedQuantity();
+
+        // UserCoupon 생성, 저장
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        UserCoupon userCoupon = UserCoupon.issue(user, coupon, LocalDateTime.now());
+        userCouponRepository.save(userCoupon);
+
+        return CouponIssueResponse.from(userCoupon);
+    }
+
 }
