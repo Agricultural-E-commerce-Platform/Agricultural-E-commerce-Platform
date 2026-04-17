@@ -1,11 +1,14 @@
 package com.spartafarmer.agri_commerce.domain.product.service;
 
+import com.spartafarmer.agri_commerce.domain.product.dto.PopularKeywordResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -21,19 +24,27 @@ public class PopularSearchService {
     }
 
     // 인기 검색어 TOP 10 조회
-    public List<Map<String, Object>> getTopKeywords() {
+    public List<PopularKeywordResponse> getTopKeywords() {
         Set<ZSetOperations.TypedTuple<String>> result =
                 redisTemplate.opsForZSet().reverseRangeWithScores(KEY, 0, 9);
 
-        List<Map<String, Object>> list = new ArrayList<>();
+        // Redis 결과가 없으면 빈 리스트 반환
+        if (result == null || result.isEmpty()) {
+            return List.of();
+        }
+
+        List<PopularKeywordResponse> list = new ArrayList<>();
         int rank = 1;
 
         for (ZSetOperations.TypedTuple<String> tuple : result) {
-            Map<String, Object> map = new HashMap<>();
-            map.put("rank", rank++);
-            map.put("keyword", tuple.getValue());
-            map.put("searchCount", tuple.getScore().longValue());
-            list.add(map);
+            // score가 null일 가능성 방어
+            long searchCount = tuple.getScore() == null ? 0L : tuple.getScore().longValue();
+
+            list.add(new PopularKeywordResponse(
+                    rank++,              // 순위
+                    tuple.getValue(),    // 검색어
+                    searchCount          // 검색 횟수
+            ));
         }
 
         return list;

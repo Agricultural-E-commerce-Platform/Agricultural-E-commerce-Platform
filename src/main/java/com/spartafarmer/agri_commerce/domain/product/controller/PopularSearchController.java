@@ -1,11 +1,11 @@
 package com.spartafarmer.agri_commerce.domain.product.controller;
 
+import com.spartafarmer.agri_commerce.domain.product.dto.PopularKeywordResponse;
 import com.spartafarmer.agri_commerce.domain.product.service.PopularSearchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,7 +16,7 @@ public class PopularSearchController {
 
     // 인기검색어 조회
     @GetMapping("/popular")
-    public List<Map<String, Object>> getPopularKeywords() {
+    public List<PopularKeywordResponse> getPopularKeywords() {
         return popularSearchService.getTopKeywords();
     }
 }

@@ -56,10 +56,6 @@ public class ProductService {
 
     // 검색 v1
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
-
-        // 검색어 집계
-        popularSearchService.increaseKeyword(keyword);
-
         return productRepository
                 .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
                         keyword,
@@ -68,16 +64,13 @@ public class ProductService {
                 )
                 .map(ProductListResponse::from);
     }
-
 
     // 검색 v2 (캐시 적용)
     @Cacheable(
             value = "productSearch",
-            key = "#keyword + ':' + #pageable.pageNumber + ':' + #pageable.pageSize"
+            key = "#keyword + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()"
     )
     public Page<ProductListResponse> searchProductsWithCache(String keyword, Pageable pageable) {
-
-        // DB 조회 (HIDDEN 제외)
         return productRepository
                 .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
                         keyword,
@@ -86,5 +79,4 @@ public class ProductService {
                 )
                 .map(ProductListResponse::from);
     }
-
 }

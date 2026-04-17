@@ -10,10 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,13 +20,19 @@ public class ProductSearchController {
 
     private final ProductService productService;
 
+    // 검색 v1 (캐시 없음)
     @GetMapping("/search")
     public Page<ProductListResponse> searchProducts(
-            @RequestParam @Size(min = 1, max = 50) String keyword, // 검색어 길이 제한
+            @RequestParam @Size(min = 1, max = 50) String keyword,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        return productService.searchProducts(keyword, pageable); // 검색 서비스 호출
+        String normalizedKeyword = keyword.trim(); // 공백 제거
+
+        // 공백만 입력한 경우 예외
+        if (normalizedKeyword.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        return productService.searchProducts(normalizedKeyword, pageable);
     }
-
-
 }
