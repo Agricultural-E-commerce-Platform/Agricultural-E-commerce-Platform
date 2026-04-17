@@ -10,11 +10,13 @@ import com.spartafarmer.agri_commerce.domain.auth.dto.response.SigninResponse;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -51,6 +53,8 @@ public class AuthService {
 
         // DB 저장
         userRepository.save(user);
+
+        log.info("회원가입 성공 - email: {}", request.email()); // 회원가입 성공 로그
     }
 
 
@@ -64,8 +68,11 @@ public class AuthService {
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+            log.warn("로그인 실패 - email: {}", request.email()); // 로그인 실패 로그
             throw new CustomException(ErrorCode.USER_INVALID_LOGIN);
         }
+
+        log.info("로그인 성공 - email: {}", request.email()); // 로그인 성공 로그
 
         // 토큰 생성 후 반환
         String bearerToken = jwtUtil.createToken(user.getId(), user.getEmail(), user.getRole());
