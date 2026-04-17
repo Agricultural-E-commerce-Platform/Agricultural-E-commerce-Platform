@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final PopularSearchService popularSearchService;
     private final ProductRepository productRepository;
 
     // 상품 목록 조회
