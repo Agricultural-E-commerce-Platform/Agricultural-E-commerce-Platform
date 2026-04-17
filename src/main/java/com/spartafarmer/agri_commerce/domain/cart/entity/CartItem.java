@@ -6,17 +6,11 @@ import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "cart_items")
-@SQLDelete(sql = "UPDATE cart_items SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")
-@Where(clause = "deleted_at IS NULL")
 public class CartItem extends BaseEntity {
 
     @Id
@@ -36,9 +30,6 @@ public class CartItem extends BaseEntity {
 
     @Column(nullable = false)
     private int quantity;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     private CartItem(Cart cart, Product product, Long price, int quantity) {
         this.cart = cart;

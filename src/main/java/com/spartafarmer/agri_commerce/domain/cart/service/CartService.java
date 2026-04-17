@@ -1,6 +1,5 @@
 package com.spartafarmer.agri_commerce.domain.cart.service;
 
-import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.cart.dto.*;
@@ -88,7 +87,7 @@ public class CartService {
 
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
-        List< CartItemResponse> items = cart.getCartItems().stream()
+        List<CartItemResponse> items = cart.getCartItems().stream()
                 .map(item -> new CartItemResponse(
                         item.getId(),
                         item.getProduct().getId(),
@@ -121,10 +120,10 @@ public class CartService {
                 cartItem.getProduct().getName(),
                 cartItem.getPrice(),
                 cartItem.getQuantity()
-    );
+        );
     }
 
-    // 장바구니 삭제(소프트 딜리트)
+    // 장바구니 삭제
     @Transactional
     public void deleteCartItem(Long cartItemId, Long userId) {
 
@@ -132,17 +131,7 @@ public class CartService {
         CartItem cartItem = cartItemRepository.findByIdAndCart_User_Id(cartItemId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        // Soft Delete 실행 (JPA가 update로 변환)
-        cartItemRepository.delete(cartItem);
-    }
-
-    // 상품 상태 검증
-    private void validateProductStatus(Product product) {
-        if (product.getStatus() == ProductStatus.SOLD_OUT) {
-            throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
-        }
-        if (product.getStatus() == ProductStatus.SALE_ENDED) {
-            throw new CustomException(ErrorCode.PRODUCT_SALE_ENDED);
-        }
+        // Cart가 CartItem 생명주기를 관리하도록 부모 컬렉션에서 제거
+        cartItem.getCart().removeCartItem(cartItem);
     }
 }
