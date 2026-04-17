@@ -9,14 +9,17 @@ import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
 import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 @Service
 @RequiredArgsConstructor
 public class ProductService {
 
+    private final PopularSearchService popularSearchService;
     private final ProductRepository productRepository;
 
     // 상품 목록 조회
@@ -51,8 +54,12 @@ public class ProductService {
         return ProductDetailResponse.from(product);
     }
 
-    // 검색 API
+    // 검색 v1
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
+
+        // 검색어 집계
+        popularSearchService.increaseKeyword(keyword);
+
         return productRepository
                 .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
                         keyword,
@@ -61,4 +68,22 @@ public class ProductService {
                 )
                 .map(ProductListResponse::from);
     }
+
+    // 검색 v2 (캐시 적용)
+    @Cacheable(
+            value = "productSearch",
+            key = "#keyword + ':' + #pageable.pageNumber + ':' + #pageable.pageSize"
+    )
+    public Page<ProductListResponse> searchProductsWithCache(String keyword, Pageable pageable) {
+
+        // DB 조회 (HIDDEN 제외)
+        return productRepository
+                .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
+                        keyword,
+                        ProductStatus.HIDDEN,
+                        pageable
+                )
+                .map(ProductListResponse::from);
+    }
+
 }
