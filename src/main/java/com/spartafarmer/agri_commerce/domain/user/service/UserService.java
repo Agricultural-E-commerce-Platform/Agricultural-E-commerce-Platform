@@ -31,7 +31,5 @@ public class UserService {
                 savedPhone,
                 request.address()
         );
-
-        log.info("회원정보 수정 성공 - email: {}", user.getEmail()); // 회원정보 수정 성공 로그
     }
 }

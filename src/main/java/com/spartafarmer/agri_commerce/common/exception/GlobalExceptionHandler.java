@@ -2,6 +2,7 @@ package com.spartafarmer.agri_commerce.common.exception;
 
 import com.spartafarmer.agri_commerce.common.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,7 +36,7 @@ public class GlobalExceptionHandler {
                 .findFirst()
                 .orElse("유효성 검증에 실패했습니다.");
 
-        log.warn("클라이언트 오류 - statusCode: 400, message: {}", message); // 4xx 에러 로그
+        log.warn("클라이언트 오류 - statusCode: {}, message: {}", HttpStatus.BAD_REQUEST.value(), message); // 4xx 에러 로그
 
         return ResponseEntity
                 .badRequest()
@@ -45,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
 
-        log.error("서버 오류 발생 - statusCode: 500, message: {}", e.getMessage(), e); // 5xx 에러 로그
+        log.error("서버 오류 발생 - statusCode: {}, message: {}", HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), e); // 5xx 에러 로그
 
         return ResponseEntity
                 .internalServerError()
