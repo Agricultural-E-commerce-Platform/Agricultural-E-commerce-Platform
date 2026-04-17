@@ -4,6 +4,7 @@ import com.spartafarmer.agri_commerce.common.response.ApiResponse;
 import com.spartafarmer.agri_commerce.common.security.AuthUser;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.request.CouponCreateRequest;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponCreateResponse;
+import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponIssueResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponListResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.UserCouponResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.service.CouponService;
@@ -50,4 +51,13 @@ public class CouponController {
             @AuthenticationPrincipal AuthUser authUser) {
         return ResponseEntity.ok(ApiResponse.success(couponService.getMyCoupons(authUser.getId())));
     }
+
+    // 선착순 쿠폰 발급
+    @PostMapping("/{couponId}/issue")
+    public ResponseEntity<ApiResponse<CouponIssueResponse>> issueCoupon(
+            @PathVariable Long couponId,
+            @AuthenticationPrincipal AuthUser authUser) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+               .body(ApiResponse.success(201, "쿠폰이 발급되었습니다.", couponService.issueCoupon(couponId, authUser.getId())));
+        }
 }

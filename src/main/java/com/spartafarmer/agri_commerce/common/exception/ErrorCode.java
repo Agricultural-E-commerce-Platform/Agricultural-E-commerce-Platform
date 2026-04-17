@@ -24,15 +24,27 @@ public enum ErrorCode {
     USER_INVALID_LOGIN(HttpStatus.BAD_REQUEST, "이메일 또는 비밀번호가 틀렸습니다."),
     USER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호는 영문, 숫자 포함 8~12자리여야 합니다."),
     USER_INVALID_EMAIL(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
-    USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx)"),
+    USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx 또는 010xxxxxxxx)"),
     USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
 
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
     PRODUCT_NOT_ON_SALE(HttpStatus.BAD_REQUEST, "현재 판매 중인 상품이 아닙니다."),
+
+    PRODUCT_SOLD_OUT(HttpStatus.CONFLICT, "품절된 상품입니다."),
+    PRODUCT_SALE_ENDED(HttpStatus.CONFLICT, "판매 종료된 상품입니다."),
+    PRODUCT_SALE_NOT_STARTED(HttpStatus.BAD_REQUEST, "아직 판매 시작 전인 상품입니다."),
     // 주문
+    CART_EMPTY(HttpStatus.BAD_REQUEST, "장바구니가 비어있습니다."),
+    MIN_ORDER_AMOUNT_NOT_MET(HttpStatus.BAD_REQUEST, "최소 주문 금액은 20,000원 이상입니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),
+    ORDER_LOCK_FAILED(HttpStatus.TOO_MANY_REQUESTS, "현재 요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요."),
 
     // 장바구니
+    CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
+    CART_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니 상품을 찾을 수 없습니다."),
+    INVALID_QUANTITY(HttpStatus.BAD_REQUEST, "수량은 1개 이상이어야 합니다."),
+    OUT_OF_STOCK(HttpStatus.CONFLICT, "재고가 부족합니다."),
 
     // 쿠폰
     COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "쿠폰을 찾을 수 없습니다."),

@@ -14,3 +14,10 @@ server:
 logging:
   level:
     root: info
+    com.spartafarmer.agri_commerce: info  # agri_commerce 패키지는 info 레벨로 설정
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health  # /actuator/health 엔드포인트만 외부 노출 (보안)

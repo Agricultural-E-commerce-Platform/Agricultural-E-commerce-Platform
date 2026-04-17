@@ -1,15 +1,17 @@
 package com.spartafarmer.agri_commerce.domain.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
+import jakarta.validation.constraints.Pattern;
 
-@Getter
-public class UserUpdateRequest {
+public record UserUpdateRequest (
+        @NotBlank
+        String name,
 
-    @NotBlank
-    private String name;
-    @NotBlank
-    private String phone;
-    @NotBlank
-    private String address;
-}
+        @Pattern(regexp = "^010(\\d{8}|(-\\d{4}){2})$",
+                message = "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx 또는 010xxxxxxxx)")
+        @NotBlank
+        String phone,
+
+        @NotBlank
+        String address
+){ }

@@ -2,6 +2,8 @@ package com.spartafarmer.agri_commerce.domain.coupon.entity;
 
 import com.spartafarmer.agri_commerce.common.entity.BaseEntity;
 import com.spartafarmer.agri_commerce.common.enums.CouponStatus;
+import com.spartafarmer.agri_commerce.common.exception.CustomException;
+import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -53,7 +55,7 @@ public class UserCoupon extends BaseEntity {
     // 쿠폰 발급
     public static UserCoupon issue(User user, Coupon coupon, LocalDateTime issuedAt) {
         // 발급일 + 5일 23:59:59
-        LocalDateTime expiredAt = issuedAt.toLocalDate().plusDays(5)
+        LocalDateTime expiredAt = issuedAt.toLocalDate().plusDays(4)
                 .atTime(23, 59, 59);
         return new UserCoupon(user, coupon, expiredAt);
     }
@@ -66,5 +68,21 @@ public class UserCoupon extends BaseEntity {
     // 쿠폰 만료 처리 (스케줄러 일괄 처리용)
     public void expire() {
         this.status = CouponStatus.EXPIRED;
+    }
+
+    // 쿠폰 사용 가능 여부 검증
+    public void validateUsable(LocalDateTime now) {
+
+        if (this.expiredAt.isBefore(now)) {
+            throw new CustomException(ErrorCode.USER_COUPON_EXPIRED);
+        }
+
+        if (this.status == CouponStatus.USED) {
+            throw new CustomException(ErrorCode.USER_COUPON_ALREADY_USED);
+        }
+
+        if (this.status == CouponStatus.EXPIRED) {
+            throw new CustomException(ErrorCode.USER_COUPON_EXPIRED);
+        }
     }
 }

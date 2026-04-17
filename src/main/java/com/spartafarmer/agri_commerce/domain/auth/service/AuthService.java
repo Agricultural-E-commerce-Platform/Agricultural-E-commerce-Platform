@@ -10,11 +10,13 @@ import com.spartafarmer.agri_commerce.domain.auth.dto.response.SigninResponse;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -29,25 +31,29 @@ public class AuthService {
 
         // 정책문제
         // 이메일 중복 체크
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new CustomException(ErrorCode.USER_DUPLICATE_EMAIL);
         }
 
         // 비밀번호 암호화
-        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        String encodedPassword = passwordEncoder.encode(request.password());
+
+        // 전화번호 포맷팅: DB에 저장할 전화번호 형식 통일 (010-xxxx-xxxx)
+        String savedPhone = User.formatPhone(request.phone());
 
         // 유저 생성 및 저장
         User user = User.create(
-                request.getEmail(),
+                request.email(),
                 encodedPassword,
-                request.getName(),
-                request.getPhone(),
-                request.getAddress(),
+                request.name(),
+                savedPhone,
+                request.address(),
                 UserRole.USER // 기본값 설정
         );
 
         // DB 저장
         userRepository.save(user);
+
     }
 
 
@@ -56,11 +62,17 @@ public class AuthService {
     public SigninResponse signin(SigninRequest request) {
 
         // 이메일로 회원 조회
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 비밀번호 검증
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+
+            String maskedEmail = request.email().length() > 3
+                    ? request.email().substring(0, 3) + "**"
+                    : "***";
+
+            log.warn("로그인 실패 - email: {}", maskedEmail); // 로그인 실패 로그
             throw new CustomException(ErrorCode.USER_INVALID_LOGIN);
         }
 

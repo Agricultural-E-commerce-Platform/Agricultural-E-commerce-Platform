@@ -10,9 +10,9 @@ import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
-    // @Where로 deleted_at IS NULL 자동 적용됨
     List<CartItem> findByCart(Cart cart);
 
-    // productId → product으로 변경
     Optional<CartItem> findByCartAndProduct(Cart cart, Product product);
+
+    Optional<CartItem> findByIdAndCart_User_Id(Long cartItemId, Long userId);
 }
