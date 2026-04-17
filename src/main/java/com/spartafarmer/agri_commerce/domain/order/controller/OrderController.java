@@ -28,7 +28,7 @@ public class OrderController {
             @RequestBody OrderCreateRequest request
     ) {
         OrderCreateResponse response =
-                orderService.createOrder(authUser.getId(), request.getUserCouponId());
+                orderService.createOrder(authUser.getId(), request.userCouponId());
 
         return ApiResponse.success(
                 201,
