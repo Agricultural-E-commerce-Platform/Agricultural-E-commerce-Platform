@@ -56,6 +56,8 @@ dependencies {
 
 	implementation 'org.springframework.boot:spring-boot-starter-quartz' // 타임세일 시작/종료 예약 실행
 	implementation 'org.springframework.boot:spring-boot-starter-validation' // 검색 파라미터 검증
+
+	implementation 'org.springframework.boot:spring-boot-starter-actuator' // 서버 상태 모니터링
 }
 
 tasks.named('test') {
