@@ -5,20 +5,21 @@ import com.spartafarmer.agri_commerce.domain.coupon.entity.UserCoupon;
 
 import java.time.LocalDateTime;
 
-public record UserCouponResponse(
-        Long userCouponId,
-        String couponName,
-        Long discountAmount,
-        LocalDateTime expiredAt,
-        CouponStatus status
-) {
-    public static UserCouponResponse from(UserCoupon userCoupon) {
-        return new UserCouponResponse(
+public record CouponIssueResponse (
+
+    Long userCouponId,
+    String couponName,
+    Long discountAmount,
+    CouponStatus status,
+    LocalDateTime expiredAt
+){
+        public static CouponIssueResponse from (UserCoupon userCoupon){
+        return new CouponIssueResponse(
                 userCoupon.getId(),
                 userCoupon.getCoupon().getName(),
                 userCoupon.getCoupon().getDiscountAmount(),
-                userCoupon.getExpiredAt(),
-                userCoupon.getStatus()
+                userCoupon.getStatus(),
+                userCoupon.getExpiredAt()
         );
     }
 }
