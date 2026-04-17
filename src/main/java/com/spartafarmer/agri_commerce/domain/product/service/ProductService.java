@@ -9,9 +9,11 @@ import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
 import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +53,7 @@ public class ProductService {
         return ProductDetailResponse.from(product);
     }
 
-    // 검색 API
+    // 검색 v1
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
         return productRepository
                 .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
@@ -60,5 +62,32 @@ public class ProductService {
                         pageable
                 )
                 .map(ProductListResponse::from);
+    }
+
+    // 검색 v2 (캐시 적용)
+    @Cacheable(
+            value = "productSearch",
+            key = "#keyword + ':' + #pageable.pageNumber + ':' + #pageable.pageSize"
+    )
+    public Page<ProductListResponse> searchProductsWithCache(String keyword, Pageable pageable) {
+        return productRepository
+                .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
+                        keyword,
+                        ProductStatus.HIDDEN,
+                        pageable
+                )
+                .map(ProductListResponse::from);
+    }
+
+    // 검색어 공통 정리
+    public String normalizeKeyword(String keyword) {
+        String normalizedKeyword = keyword.trim(); // 앞뒤 공백 제거
+
+        // 공백만 들어온 경우 예외
+        if (normalizedKeyword.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        return normalizedKeyword;
     }
 }
