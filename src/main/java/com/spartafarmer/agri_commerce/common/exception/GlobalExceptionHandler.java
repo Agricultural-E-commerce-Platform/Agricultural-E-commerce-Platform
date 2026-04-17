@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<?>> handleException(Exception e) {
 
-        log.error("서버 오류 발생 - statusCode: {}, message: {}", HttpStatus.INTERNAL_SERVER_ERROR.value(), e.getMessage(), e); // 5xx 에러 로그
+        log.error("서버 오류 발생 - statusCode: {}", HttpStatus.INTERNAL_SERVER_ERROR.value(), e); // 5xx 에러 로그
 
         return ResponseEntity
                 .internalServerError()
