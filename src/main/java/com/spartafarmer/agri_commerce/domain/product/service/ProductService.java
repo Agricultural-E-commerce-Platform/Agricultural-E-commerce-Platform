@@ -13,8 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -24,27 +22,16 @@ public class ProductService {
     // 상품 목록 조회
     public Page<ProductListResponse> getProducts(ProductType type, Pageable pageable) {
 
-        // 특가 상품 조회인 경우:
-        // 현재 판매중(ON_SALE)인 특가 상품만 조회
-        if (type == ProductType.SPECIAL) {
-            return productRepository
-                    .findByTypeAndStatusOrderByCreatedAtDesc(
-                            ProductType.SPECIAL,   // 특가 상품만 조회
-                            ProductStatus.ON_SALE, // 현재 판매중 상태만 조회
-                            pageable
-                    )
-                    .map(ProductListResponse::from); // 엔티티를 DTO로 변환
-        }
-
         Page<Product> products;
+
 
         // type이 없으면 전체 상품 목록 조회
         if (type == null) {
-            products = productRepository.findAllByOrderByCreatedAtDesc(pageable);
+            products = productRepository.findByStatusNotOrderByCreatedAtDesc(ProductStatus.HIDDEN, pageable);
         }
         // type이 있으면 해당 타입 상품만 조회
         else {
-            products = productRepository.findByTypeOrderByCreatedAtDesc(type, pageable);
+            products = productRepository.findByTypeAndStatusNotOrderByCreatedAtDesc(type, ProductStatus.HIDDEN, pageable);
         }
 
         return products.map(ProductListResponse::from); // 응답 DTO로 변환
@@ -56,13 +43,12 @@ public class ProductService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        // 특가 상품이고 아직 시작 전이면 상세 조회 불가
-        if (product.getType() == ProductType.SPECIAL &&
-                product.getStatus() == ProductStatus.READY) {
-            throw new CustomException(ErrorCode.PRODUCT_SALE_NOT_STARTED); // 판매 시작 전 상품 예외
+        // 비공개 상품은 상세 조회 불가
+        if (product.getStatus() == ProductStatus.HIDDEN) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
         }
 
-        return ProductDetailResponse.from(product); // 판매 종료 상품은 상세 조회 가능
+        return ProductDetailResponse.from(product);
     }
 
     // 검색 API
