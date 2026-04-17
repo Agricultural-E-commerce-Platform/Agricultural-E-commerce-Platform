@@ -1,5 +1,6 @@
 package com.spartafarmer.agri_commerce.domain.product.service;
 
+import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
@@ -26,11 +27,11 @@ public class ProductService {
 
         // type이 없으면 전체 상품 목록 조회
         if (type == null) {
-            products = productRepository.findAllByOrderByCreatedAtDesc(pageable);
+            products = productRepository.findByStatusNotOrderByCreatedAtDesc(ProductStatus.HIDDEN, pageable);
         }
         // type이 있으면 해당 타입 상품만 조회
         else {
-            products = productRepository.findByTypeOrderByCreatedAtDesc(type, pageable);
+            products = productRepository.findByTypeAndStatusNotOrderByCreatedAtDesc(type, ProductStatus.HIDDEN, pageable);
         }
 
         return products.map(ProductListResponse::from); // 응답 DTO로 변환
@@ -41,6 +42,11 @@ public class ProductService {
         // Service 계층에서 직접 예외 처리 로직을 작성
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 비공개 상품은 상세 조회 불가
+        if (product.getStatus() == ProductStatus.HIDDEN) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
 
         return ProductDetailResponse.from(product);
     }
