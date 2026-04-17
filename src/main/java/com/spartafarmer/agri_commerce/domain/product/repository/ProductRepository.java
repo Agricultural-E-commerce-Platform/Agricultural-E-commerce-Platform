@@ -17,20 +17,17 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 전체 상품 최신순 조회
-    Page<Product> findAllByOrderByCreatedAtDesc(Pageable pageable);
+    Page<Product> findByStatusNotOrderByCreatedAtDesc(ProductStatus status, Pageable pageable);
 
     // 특정 타입의 상품만 최신순으로 조회(특가)
-    Page<Product> findByTypeOrderByCreatedAtDesc(ProductType type, Pageable pageable);
+    Page<Product> findByTypeAndStatusNotOrderByCreatedAtDesc(ProductType type, ProductStatus status, Pageable pageable);
 
-    // 특가 상품 중 현재 판매중인 상품만 최신순으로 조회
-    Page<Product> findByTypeAndStatusOrderByCreatedAtDesc(
-            ProductType type,
+    // HIDDEN 제외 검색
+    Page<Product> findByNameContainingAndStatusNotOrderByCreatedAtDesc(
+            String keyword,
             ProductStatus status,
             Pageable pageable
     );
-
-    // 상품명에 keyword가 포함된 상품을 최신순으로 조회
-    Page<Product> findByNameContainingOrderByCreatedAtDesc(String keyword, Pageable pageable);
 
     // 타임세일 상태 변경 시 비관적 락을 적용하여 상품 조회
     @Lock(LockModeType.PESSIMISTIC_WRITE)
