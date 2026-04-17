@@ -1,6 +1,5 @@
 package com.spartafarmer.agri_commerce.domain.cart.service;
 
-import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.cart.dto.*;
@@ -37,10 +36,10 @@ public class CartService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 상품 조회
-        Product product = productRepository.findById(request.getProductId())
+        Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        product.validateOrderable(request.getQuantity());
+        product.validateOrderable(request.quantity());
 
         // 장바구니 조회
         Cart cart = cartRepository.findByUser(user)
@@ -51,7 +50,7 @@ public class CartService {
                 .orElse(null);
 
         if (cartItem != null) {
-            int newQuantity = cartItem.getQuantity() + request.getQuantity();
+            int newQuantity = cartItem.getQuantity() + request.quantity();
 
             if (newQuantity > product.getStock()) {
                 throw new CustomException(ErrorCode.OUT_OF_STOCK);
@@ -69,7 +68,7 @@ public class CartService {
         }
 
         // 신규 생성
-        CartItem newItem = CartItem.create(cart, product, product.getSalePrice(), request.getQuantity());
+        CartItem newItem = CartItem.create(cart, product, product.getSalePrice(), request.quantity());
         cartItemRepository.save(newItem);
 
         return new CartAddResponse(
@@ -88,7 +87,7 @@ public class CartService {
 
         Cart cart = cartRepository.findByUser(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
-        List< CartItemResponse> items = cart.getCartItems().stream()
+        List<CartItemResponse> items = cart.getCartItems().stream()
                 .map(item -> new CartItemResponse(
                         item.getId(),
                         item.getProduct().getId(),
@@ -97,7 +96,7 @@ public class CartService {
                         item.getQuantity(),
                         item.getProduct().getStatus()
                 )).toList();
-        long totalPrice = items.stream().mapToLong(i -> i.getPrice() * i.getQuantity()).sum();
+        long totalPrice = items.stream().mapToLong(i -> i.price() * i.quantity()).sum();
         boolean isMinOrderAmountMet = totalPrice >= MIN_ORDER_AMOUNT;
         return new CartResponse(items, totalPrice, MIN_ORDER_AMOUNT, isMinOrderAmountMet);
     }
@@ -110,21 +109,21 @@ public class CartService {
 
 
         // 재고 초과 검증
-        if (request.getQuantity() > cartItem.getProduct().getStock()) {
+        if (request.quantity() > cartItem.getProduct().getStock()) {
             throw new CustomException(ErrorCode.OUT_OF_STOCK);
         }
 
-        cartItem.updateQuantity(request.getQuantity());
+        cartItem.updateQuantity(request.quantity());
         return new CartUpdateResponse(
                 cartItem.getId(),
                 cartItem.getProduct().getId(),
                 cartItem.getProduct().getName(),
                 cartItem.getPrice(),
                 cartItem.getQuantity()
-    );
+        );
     }
 
-    // 장바구니 삭제(소프트 딜리트)
+    // 장바구니 삭제
     @Transactional
     public void deleteCartItem(Long cartItemId, Long userId) {
 
@@ -132,17 +131,7 @@ public class CartService {
         CartItem cartItem = cartItemRepository.findByIdAndCart_User_Id(cartItemId, userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_ITEM_NOT_FOUND));
 
-        // Soft Delete 실행 (JPA가 update로 변환)
-        cartItemRepository.delete(cartItem);
-    }
-
-    // 상품 상태 검증
-    private void validateProductStatus(Product product) {
-        if (product.getStatus() == ProductStatus.SOLD_OUT) {
-            throw new CustomException(ErrorCode.PRODUCT_SOLD_OUT);
-        }
-        if (product.getStatus() == ProductStatus.SALE_ENDED) {
-            throw new CustomException(ErrorCode.PRODUCT_SALE_ENDED);
-        }
+        // Cart가 CartItem 생명주기를 관리하도록 부모 컬렉션에서 제거
+        cartItem.getCart().removeCartItem(cartItem);
     }
 }

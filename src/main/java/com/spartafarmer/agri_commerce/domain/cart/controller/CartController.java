@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     private final CartService cartService;
 
-    // 장바구나 담기
+    // 장바구니 담기
     @PostMapping
     public ApiResponse<CartAddResponse> addCart(
             @Valid @RequestBody CartAddRequest request,
@@ -38,11 +38,10 @@ public class CartController {
         return ApiResponse.success(200, "장바구니 수량 변경 성공", cartService.updateQuantity(cartItemId, request, authUser.getId()));
     }
 
-    // 장바구니 삭제 (소프트 딜리트)
-    @PatchMapping("/items/{cartItemId}")
+    // 장바구니 삭제
+    @DeleteMapping("/items/{cartItemId}")
     public ApiResponse<Void> deleteCartItem(@PathVariable Long cartItemId, @AuthenticationPrincipal AuthUser authUser) {
         cartService.deleteCartItem(cartItemId, authUser.getId());
         return ApiResponse.success(200, "장바구니 상품 삭제 성공", null);
     }
-
 }
