@@ -36,10 +36,10 @@ public class CartService {
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         // 상품 조회
-        Product product = productRepository.findById(request.getProductId())
+        Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        product.validateOrderable(request.getQuantity());
+        product.validateOrderable(request.quantity());
 
         // 장바구니 조회
         Cart cart = cartRepository.findByUser(user)
@@ -50,7 +50,7 @@ public class CartService {
                 .orElse(null);
 
         if (cartItem != null) {
-            int newQuantity = cartItem.getQuantity() + request.getQuantity();
+            int newQuantity = cartItem.getQuantity() + request.quantity();
 
             if (newQuantity > product.getStock()) {
                 throw new CustomException(ErrorCode.OUT_OF_STOCK);
@@ -68,7 +68,7 @@ public class CartService {
         }
 
         // 신규 생성
-        CartItem newItem = CartItem.create(cart, product, product.getSalePrice(), request.getQuantity());
+        CartItem newItem = CartItem.create(cart, product, product.getSalePrice(), request.quantity());
         cartItemRepository.save(newItem);
 
         return new CartAddResponse(
@@ -96,7 +96,7 @@ public class CartService {
                         item.getQuantity(),
                         item.getProduct().getStatus()
                 )).toList();
-        long totalPrice = items.stream().mapToLong(i -> i.getPrice() * i.getQuantity()).sum();
+        long totalPrice = items.stream().mapToLong(i -> i.price() * i.quantity()).sum();
         boolean isMinOrderAmountMet = totalPrice >= MIN_ORDER_AMOUNT;
         return new CartResponse(items, totalPrice, MIN_ORDER_AMOUNT, isMinOrderAmountMet);
     }
@@ -109,11 +109,11 @@ public class CartService {
 
 
         // 재고 초과 검증
-        if (request.getQuantity() > cartItem.getProduct().getStock()) {
+        if (request.quantity() > cartItem.getProduct().getStock()) {
             throw new CustomException(ErrorCode.OUT_OF_STOCK);
         }
 
-        cartItem.updateQuantity(request.getQuantity());
+        cartItem.updateQuantity(request.quantity());
         return new CartUpdateResponse(
                 cartItem.getId(),
                 cartItem.getProduct().getId(),
