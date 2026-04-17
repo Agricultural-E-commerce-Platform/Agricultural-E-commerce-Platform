@@ -58,6 +58,14 @@ public class User extends BaseEntity {
         return new User(email, password, name, phone, address, role);
     }
 
+    // 전화번호 포맷팅: DB에 저장할 전화번호 형식 통일 (010-xxxx-xxxx)
+    public static String formatPhone(String phone) {
+        String formattedPhone = phone.replaceAll("-", "");
+        return formattedPhone.substring(0, 3) + "-"
+                + formattedPhone.substring(3, 7) + "-"
+                + formattedPhone.substring(7);
+    }
+
     // 회원 정보 수정 - 전체 수정(부분 수정 X)
     public void update(String name, String phone, String address) {
         this.name = name;

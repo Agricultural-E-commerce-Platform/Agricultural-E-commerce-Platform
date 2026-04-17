@@ -21,16 +21,8 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        // 하이픈 제거 후 검증
-        String formattedPhone = request.phone().replaceAll("-", "");
-        if (formattedPhone.length() != 11) {
-            throw new CustomException(ErrorCode.USER_INVALID_PHONE);
-        }
-
-        // 형식 맞춰서 저장 (010-xxxx-xxxx)
-        String savedPhone = formattedPhone.substring(0, 3) + "-"
-                + formattedPhone.substring(3, 7) + "-"
-                + formattedPhone.substring(7);
+        // 전화번호 포맷팅: DB에 저장할 전화번호 형식 통일 (010-xxxx-xxxx)
+        String savedPhone = User.formatPhone(request.phone());
 
         user.update(
                 request.name(),
