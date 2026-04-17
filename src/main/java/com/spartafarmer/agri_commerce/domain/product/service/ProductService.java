@@ -23,6 +23,7 @@ public class ProductService {
 
         Page<Product> products;
 
+
         // type이 없으면 전체 상품 목록 조회
         if (type == null) {
             products = productRepository.findAllByOrderByCreatedAtDesc(pageable);
