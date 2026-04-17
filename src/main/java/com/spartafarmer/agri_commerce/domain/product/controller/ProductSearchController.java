@@ -26,13 +26,7 @@ public class ProductSearchController {
             @RequestParam @Size(min = 1, max = 50) String keyword,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        String normalizedKeyword = keyword.trim(); // 공백 제거
-
-        // 공백만 입력한 경우 예외
-        if (normalizedKeyword.isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
-        }
-
+        String normalizedKeyword = productService.normalizeKeyword(keyword); // 공통 처리
         return productService.searchProducts(normalizedKeyword, pageable);
     }
 }

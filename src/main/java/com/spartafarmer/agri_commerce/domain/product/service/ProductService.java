@@ -67,7 +67,7 @@ public class ProductService {
     // 검색 v2 (캐시 적용)
     @Cacheable(
             value = "productSearch",
-            key = "#keyword + ':' + #pageable.pageNumber + ':' + #pageable.pageSize + ':' + #pageable.sort.toString()"
+            key = "#keyword + ':' + #pageable.pageNumber + ':' + #pageable.pageSize"
     )
     public Page<ProductListResponse> searchProductsWithCache(String keyword, Pageable pageable) {
         return productRepository
@@ -77,5 +77,17 @@ public class ProductService {
                         pageable
                 )
                 .map(ProductListResponse::from);
+    }
+
+    // 검색어 공통 정리
+    public String normalizeKeyword(String keyword) {
+        String normalizedKeyword = keyword.trim(); // 앞뒤 공백 제거
+
+        // 공백만 들어온 경우 예외
+        if (normalizedKeyword.isEmpty()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        return normalizedKeyword;
     }
 }

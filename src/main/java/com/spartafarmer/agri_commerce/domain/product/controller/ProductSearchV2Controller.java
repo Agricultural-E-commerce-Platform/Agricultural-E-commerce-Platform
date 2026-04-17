@@ -25,20 +25,14 @@ public class ProductSearchV2Controller {
     // 검색 v2 (캐시 적용 + 인기검색어 집계)
     @GetMapping("/search")
     public Page<ProductListResponse> searchProductsV2(
-            @RequestParam @Size(min = 1, max = 50) String keyword, // 검색어 제한
+            @RequestParam @Size(min = 1, max = 50) String keyword,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        String normalizedKeyword = keyword.trim(); // 공백 제거
+        String normalizedKeyword = productService.normalizeKeyword(keyword); // 공통 처리
 
-        // 공백만 입력한 경우 예외
-        if (normalizedKeyword.isEmpty()) {
-            throw new CustomException(ErrorCode.INVALID_REQUEST);
-        }
-
-        // v2에서만 검색어 집계
+        // v2만 집계
         popularSearchService.increaseKeyword(normalizedKeyword);
 
-        // 검색 실행
         return productService.searchProductsWithCache(normalizedKeyword, pageable);
     }
 }
