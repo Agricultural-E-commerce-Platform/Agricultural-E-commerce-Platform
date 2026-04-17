@@ -10,7 +10,6 @@ import java.util.Optional;
 
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
 
-    // @Where로 deleted_at IS NULL 자동 적용됨
     List<CartItem> findByCart(Cart cart);
 
     Optional<CartItem> findByCartAndProduct(Cart cart, Product product);

@@ -14,7 +14,6 @@ import com.spartafarmer.agri_commerce.domain.order.entity.Order;
 import com.spartafarmer.agri_commerce.domain.order.entity.OrderItem;
 import com.spartafarmer.agri_commerce.domain.order.repository.OrderRepository;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
-import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepository;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ public class OrderService {
 
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
-    private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
     private final UserCouponRepository userCouponRepository;
 
@@ -101,14 +99,12 @@ public class OrderService {
 
             product.decreaseStock(item.getQuantity());
 
-            OrderItem orderItem = OrderItem.create(
+            OrderItem.create(
                     order,
                     product,
                     product.getSalePrice(),
                     item.getQuantity()
             );
-
-            order.addOrderItem(orderItem);
         }
 
         orderRepository.save(order);
@@ -118,8 +114,8 @@ public class OrderService {
             userCoupon.use();
         }
 
-        // 장바구니 초기화
-        cart.getCartItems().clear();
+        // 주문 완료 후 장바구니 비우기
+        cart.clearCartItems();
 
         // 응답
         return new OrderCreateResponse(
