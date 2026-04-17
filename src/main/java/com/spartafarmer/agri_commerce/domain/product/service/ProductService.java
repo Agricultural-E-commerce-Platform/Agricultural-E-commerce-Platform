@@ -69,6 +69,7 @@ public class ProductService {
                 .map(ProductListResponse::from);
     }
 
+
     // 검색 v2 (캐시 적용)
     @Cacheable(
             value = "productSearch",
