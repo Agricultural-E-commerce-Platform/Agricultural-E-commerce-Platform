@@ -10,11 +10,13 @@ import com.spartafarmer.agri_commerce.domain.auth.dto.response.SigninResponse;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class AuthService {
 
@@ -51,6 +53,7 @@ public class AuthService {
 
         // DB 저장
         userRepository.save(user);
+
     }
 
 
@@ -64,6 +67,12 @@ public class AuthService {
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+
+            String maskedEmail = request.email().length() > 3
+                    ? request.email().substring(0, 3) + "**"
+                    : "***";
+
+            log.warn("로그인 실패 - email: {}", maskedEmail); // 로그인 실패 로그
             throw new CustomException(ErrorCode.USER_INVALID_LOGIN);
         }
 
