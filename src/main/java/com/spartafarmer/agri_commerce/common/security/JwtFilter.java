@@ -30,7 +30,12 @@ public class JwtFilter extends OncePerRequestFilter {
         String url = request.getRequestURI();
 
         // 인증이 필요 없는 URL은 필터를 건너뜀 (회원가입, 로그인)
-        if(url.startsWith("/api/auth")) {
+        if(url.startsWith("/api/auth")
+                || url.startsWith("/api/products")
+                || url.startsWith("/api/v1/products")
+                || url.startsWith("/api/v2/products")
+                || url.startsWith("/actuator")
+        ) {
             filterChain.doFilter(request, response);
             return;
         }

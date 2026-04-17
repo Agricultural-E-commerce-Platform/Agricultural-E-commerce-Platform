@@ -30,10 +30,10 @@ public class SecurityConfig {
                 .addFilterBefore(jwtFilter, SecurityContextHolderAwareRequestFilter.class) // JWT 필터 등록
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()         // 회원가입, 로그인
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")   // 관리자만
                         .requestMatchers("/api/products/**").permitAll()     // 상품 조회
                         .requestMatchers("/api/v1/products/**").permitAll()  // 검색 v1
                         .requestMatchers("/api/v2/products/**").permitAll()  // 검색 v2
+                        .requestMatchers("/actuator/health").permitAll()  // 서버 상태 모니터링
                         .anyRequest().authenticated() // 나머지는 인증 필요
                 )
                 .build();
