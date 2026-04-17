@@ -39,7 +39,6 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private UserRole role;
 
-    // 회원정보 변경 기능이 추가 되어서 updatedAt 만들었음 - Todo: 각 엔티티에 모두 필요하면 BaseEntity를 수정하면 되는데 대부분 없어서 여기는 직접 적음 - 지훈
     @LastModifiedDate
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
