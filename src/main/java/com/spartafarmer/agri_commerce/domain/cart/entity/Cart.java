@@ -26,7 +26,7 @@ public class Cart extends BaseEntity {
     private User user;
 
     @Getter(AccessLevel.NONE)
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartItem> cartItems = new ArrayList<>();
 
     private Cart(User user) {
@@ -43,8 +43,22 @@ public class Cart extends BaseEntity {
         return Collections.unmodifiableList(cartItems);
     }
 
-    // 장바구니 상품 추가
+    // 장바구니 상품 추가(연관관계 편의 메서드)
     public void addCartItem(CartItem cartItem) {
         this.cartItems.add(cartItem);
+    }
+
+    // 장바구니 상품 삭제(개별)
+    // 유저가 장바구니 상품 삭제하는 것
+    // orphanRemoval = true에 의해 DB에서도 해당 CartItem이 삭제됨
+    public void removeCartItem(CartItem cartItem) {
+        this.cartItems.remove(cartItem);
+    }
+
+    // 장바구니 비우기 - 전체 delete
+    // 주문 완료 시 장바구니에 담긴 모든 상품을 제거하는 용도
+    // orphanRemoval = true에 의해 모든 CartItem이 DB에서 삭제됨
+    public void clearCartItems() {
+        this.cartItems.clear();
     }
 }

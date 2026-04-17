@@ -7,6 +7,7 @@ import com.spartafarmer.agri_commerce.domain.order.dto.OrderCreateResponse;
 import com.spartafarmer.agri_commerce.domain.order.dto.OrderListResponse;
 import com.spartafarmer.agri_commerce.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,12 +22,13 @@ public class OrderController {
 
     // 주문 생성
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ApiResponse<OrderCreateResponse> createOrder(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody OrderCreateRequest request
     ) {
         OrderCreateResponse response =
-                orderService.createOrder(authUser.getId(), request.getUserCouponId());
+                orderService.createOrder(authUser.getId(), request.userCouponId());
 
         return ApiResponse.success(
                 201,
