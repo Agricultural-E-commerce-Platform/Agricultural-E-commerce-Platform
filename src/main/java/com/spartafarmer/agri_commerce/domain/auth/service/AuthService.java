@@ -68,7 +68,7 @@ public class AuthService {
 
         // 비밀번호 검증
         if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            log.warn("로그인 실패 - email: {}", request.email()); // 로그인 실패 로그
+            log.warn("로그인 실패 - email: {}**", request.email().substring(0, 3)); // 로그인 실패 로그
             throw new CustomException(ErrorCode.USER_INVALID_LOGIN);
         }
 
