@@ -53,7 +53,12 @@ public class ProductService {
 
     // 검색 API
     public Page<ProductListResponse> searchProducts(String keyword, Pageable pageable) {
-        return productRepository.findByNameContainingOrderByCreatedAtDesc(keyword, pageable)
-                .map(ProductListResponse::from); // 검색 결과를 DTO로 변환해서 반환
+        return productRepository
+                .findByNameContainingAndStatusNotOrderByCreatedAtDesc(
+                        keyword,
+                        ProductStatus.HIDDEN,
+                        pageable
+                )
+                .map(ProductListResponse::from);
     }
 }
