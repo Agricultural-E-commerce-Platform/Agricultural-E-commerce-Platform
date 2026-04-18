@@ -41,7 +41,7 @@ public class UserCoupon extends BaseEntity {
     @Column(nullable = false)
     private CouponStatus status;
 
-    // 쿠폰 만료 시각 (발급일 + 5일 23:59)
+    // 쿠폰 만료 시각 (발급일 + 5일 23:59)-> 발급일 포함 5일
     @Column(nullable = false)
     private LocalDateTime expiredAt;
 
@@ -54,7 +54,7 @@ public class UserCoupon extends BaseEntity {
 
     // 쿠폰 발급
     public static UserCoupon issue(User user, Coupon coupon, LocalDateTime issuedAt) {
-        // 발급일 + 5일 23:59:59
+
         LocalDateTime expiredAt = issuedAt.toLocalDate().plusDays(4)
                 .atTime(23, 59, 59);
         return new UserCoupon(user, coupon, expiredAt);
