@@ -38,7 +38,6 @@ public enum ErrorCode {
     CART_EMPTY(HttpStatus.BAD_REQUEST, "장바구니가 비어있습니다."),
     MIN_ORDER_AMOUNT_NOT_MET(HttpStatus.BAD_REQUEST, "최소 주문 금액은 20,000원 이상입니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),
-    ORDER_LOCK_FAILED(HttpStatus.TOO_MANY_REQUESTS, "현재 요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요."),
 
     // 장바구니
     CART_NOT_FOUND(HttpStatus.NOT_FOUND, "장바구니를 찾을 수 없습니다."),
@@ -51,13 +50,15 @@ public enum ErrorCode {
     COUPON_SOLD_OUT(HttpStatus.CONFLICT, "선착순 쿠폰이 모두 소진되었습니다."),
     COUPON_NOT_AVAILABLE_TIME(HttpStatus.BAD_REQUEST, "쿠폰 발급 가능 시간이 아닙니다."),
     COUPON_ALREADY_ISSUED(HttpStatus.CONFLICT, "이미 발급받은 쿠폰입니다."),
-    COUPON_LOCK_FAILED(HttpStatus.CONFLICT, "잠시 후 다시 시도해주세요."),
     USER_COUPON_NOT_FOUND(HttpStatus.NOT_FOUND, "보유한 쿠폰을 찾을 수 없습니다."),
     USER_COUPON_ALREADY_USED(HttpStatus.BAD_REQUEST, "이미 사용된 쿠폰입니다."),
     USER_COUPON_EXPIRED(HttpStatus.BAD_REQUEST, "만료된 쿠폰입니다."),
     COUPON_NOT_APPLICABLE(HttpStatus.BAD_REQUEST, "특가 상품이 포함된 주문에는 쿠폰을 사용할 수 없습니다."),
     INVALID_COUPON_START_TIME(HttpStatus.BAD_REQUEST, "시작 시각은 현재 시각 이후여야 합니다."),
-    INVALID_COUPON_END_TIME(HttpStatus.BAD_REQUEST, "종료 시각은 시작 시각보다 이후여야 합니다.");
+    INVALID_COUPON_END_TIME(HttpStatus.BAD_REQUEST, "종료 시각은 시작 시각보다 이후여야 합니다."),
+
+    // 동시성 제어
+    LOCK_ACQUIRE_FAILED(HttpStatus.TOO_MANY_REQUESTS, "요청이 많아 처리할 수 없습니다. 잠시 후 다시 시도해주세요.");
 
     // 이 코드 위쪽에 에러 코드 작성
     private final HttpStatus status;
