@@ -23,7 +23,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile("local") // 로컬 환경에서만 실행 -> local 프로파일로 실행할 때만 생성됨
+@Profile({"local", "prod"}) // 로컬 + 서버 환경에서 실행
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
