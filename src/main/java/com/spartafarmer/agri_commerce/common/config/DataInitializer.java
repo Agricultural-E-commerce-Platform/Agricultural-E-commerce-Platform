@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -99,6 +100,19 @@ public class DataInitializer implements CommandLineRunner {
 
         productRepository.saveAll(products);
         log.info("상품 18개 생성 완료 (일반 10 + 특가 5 + 테스트용 3)");
+
+        // 테스트 상품 10000개
+        List<Product> testProducts = new ArrayList<>();
+        for (int i = 1; i <= 50000; i++) {
+            testProducts.add(Product.create(
+                    "테스트 상품 " + i,
+                    ProductType.NORMAL,
+                    10000L, 8000L, null,
+                    100, ProductStatus.ON_SALE, null
+            ));
+        }
+        productRepository.saveAll(testProducts);
+        log.info("테스트 상품 50000개 생성 완료");
     }
 
     private void createCoupons() {
