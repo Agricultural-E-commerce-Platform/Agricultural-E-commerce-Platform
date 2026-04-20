@@ -101,7 +101,7 @@ public class DataInitializer implements CommandLineRunner {
         productRepository.saveAll(products);
         log.info("상품 18개 생성 완료 (일반 10 + 특가 5 + 테스트용 3)");
 
-        // 테스트 상품 10000개
+        // 테스트 상품 50000개
         List<Product> testProducts = new ArrayList<>();
         for (int i = 1; i <= 50000; i++) {
             testProducts.add(Product.create(
