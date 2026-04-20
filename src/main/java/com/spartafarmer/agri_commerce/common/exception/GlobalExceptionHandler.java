@@ -73,4 +73,5 @@ public class GlobalExceptionHandler {
         log.info("클라이언트 오류 - statusCode: {}, message: {}", HttpStatus.BAD_REQUEST.value(), message);
         return ResponseEntity.badRequest().body(ApiResponse.error(400, message));
     }
+
 }

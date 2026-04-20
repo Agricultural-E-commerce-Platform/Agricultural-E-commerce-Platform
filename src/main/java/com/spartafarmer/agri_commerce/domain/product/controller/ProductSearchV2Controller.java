@@ -40,4 +40,5 @@ public class ProductSearchV2Controller {
         }
         return productService.searchProductsWithCache(normalizedKeyword, pageable);
     }
+
 }
