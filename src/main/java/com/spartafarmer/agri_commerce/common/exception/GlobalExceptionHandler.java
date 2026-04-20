@@ -1,11 +1,13 @@
 package com.spartafarmer.agri_commerce.common.exception;
 
 import com.spartafarmer.agri_commerce.common.response.ApiResponse;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -52,4 +54,24 @@ public class GlobalExceptionHandler {
                 .internalServerError()
                 .body(ApiResponse.error(500, "서버 오류가 발생했습니다."));
     }
+
+    // 1. keyword 파라미터 자체가 없을 때 (500 → 400)
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ApiResponse<?>> handleMissingParam(MissingServletRequestParameterException e) {
+        String message = e.getParameterName() + " 파라미터가 필요합니다.";
+        log.info("클라이언트 오류 - statusCode: {}, message: {}", HttpStatus.BAD_REQUEST.value(), message);
+        return ResponseEntity.badRequest().body(ApiResponse.error(400, message));
+    }
+
+    // 2. 50자 초과 등 @Size 검증 실패할 때 (500 → 400)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<?>> handleConstraintViolation(ConstraintViolationException e) {
+        String message = e.getConstraintViolations().stream()
+                .map(v -> v.getMessage())
+                .findFirst()
+                .orElse("입력값이 올바르지 않습니다.");
+        log.info("클라이언트 오류 - statusCode: {}, message: {}", HttpStatus.BAD_REQUEST.value(), message);
+        return ResponseEntity.badRequest().body(ApiResponse.error(400, message));
+    }
+
 }
