@@ -28,7 +28,7 @@ public class ProductSearchV2Controller {
     ) {
         String normalizedKeyword = productService.normalizeKeyword(keyword);
 
-        // TODO: 실제 로그인 사용자 ID 꺼내는 방식으로 교체
+        // 실제 로그인 사용자 ID 꺼내는 방식으로 교체
         Long userId = 1L;
 
         // 회원당 동일 검색어 1회만 집계
