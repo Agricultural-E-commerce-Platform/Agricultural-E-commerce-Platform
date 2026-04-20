@@ -1,7 +1,5 @@
 package com.spartafarmer.agri_commerce.domain.product.controller;
 
-import com.spartafarmer.agri_commerce.common.exception.CustomException;
-import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.service.PopularSearchService;
 import com.spartafarmer.agri_commerce.domain.product.service.ProductService;
@@ -28,10 +26,13 @@ public class ProductSearchV2Controller {
             @RequestParam @Size(min = 1, max = 50) String keyword,
             @PageableDefault(size = 10) Pageable pageable
     ) {
-        String normalizedKeyword = productService.normalizeKeyword(keyword); // 공통 처리
+        String normalizedKeyword = productService.normalizeKeyword(keyword);
 
-        // v2만 집계
-        popularSearchService.increaseKeyword(normalizedKeyword);
+        // 실제 로그인 사용자 ID 꺼내는 방식으로 교체
+        Long userId = 1L;
+
+        // 회원당 동일 검색어 1회만 집계
+        popularSearchService.increaseKeyword(userId, normalizedKeyword);
 
         return productService.searchProductsWithCache(normalizedKeyword, pageable);
     }
