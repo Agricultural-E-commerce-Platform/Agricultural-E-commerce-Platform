@@ -101,7 +101,7 @@ public class DataInitializer implements CommandLineRunner {
         productRepository.saveAll(products);
         log.info("상품 18개 생성 완료 (일반 10 + 특가 5 + 테스트용 3)");
 
-        // 테스트 상품 50000개
+        // 테스트 상품 50000개 - 청크 단위로 저장
         List<Product> testProducts = new ArrayList<>();
         for (int i = 1; i <= 50000; i++) {
             testProducts.add(Product.create(
@@ -110,8 +110,14 @@ public class DataInitializer implements CommandLineRunner {
                     10000L, 8000L, null,
                     100, ProductStatus.ON_SALE, null
             ));
+
+            // 1000개씩 끊어서 저장
+            if (i % 1000 == 0) {
+                productRepository.saveAll(testProducts);
+                testProducts.clear(); // 영속성 컨텍스트 부하 줄이기
+                log.info("테스트 상품 {}개 저장 완료", i);
+            }
         }
-        productRepository.saveAll(testProducts);
         log.info("테스트 상품 50000개 생성 완료");
     }
 
