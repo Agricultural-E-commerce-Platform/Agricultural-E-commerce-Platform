@@ -6,6 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -31,6 +34,29 @@ public class LockService {
         } finally {
             // 작업이 끝나거나 예외 처리 되면 락 풀기
             redisLockRepository.unlock(key, uuid);
+        }
+    }
+
+    // 다중 락
+    public <T> T executeWithLocks(List<String> keys, Duration ttl, Supplier<T> task) {
+        String uuid = UUID.randomUUID().toString();
+        List<String> lockedKeys = new ArrayList<>();
+
+        try {
+            for (String key : keys) {
+                boolean locked = redisLockRepository.tryLock(key, uuid, ttl);
+                if (!locked) {
+                    throw new CustomException(ErrorCode.LOCK_ACQUIRE_FAILED);
+                }
+                lockedKeys.add(key);
+            }
+
+            return task.get();
+        } finally {
+            Collections.reverse(lockedKeys);
+            for (String key : lockedKeys) {
+                redisLockRepository.unlock(key, uuid);
+            }
         }
     }
 }

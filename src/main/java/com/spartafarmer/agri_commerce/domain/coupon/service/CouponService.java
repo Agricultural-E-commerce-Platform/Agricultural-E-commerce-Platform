@@ -2,6 +2,7 @@ package com.spartafarmer.agri_commerce.domain.coupon.service;
 
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
+import com.spartafarmer.agri_commerce.common.lock.LockService;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.request.CouponCreateRequest;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponCreateResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponIssueResponse;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -28,7 +30,8 @@ public class CouponService {
 
     private final CouponRepository couponRepository;
     private final UserCouponRepository userCouponRepository;
-    private final UserRepository userRepository;
+    private final LockService lockService;  // 락 잡는 용도
+    private final CouponIssueService couponIssueService;    // 실제 발급 로직 호출용
 
     // 쿠폰 생성 (관리자)
     @Transactional
@@ -73,39 +76,14 @@ public class CouponService {
                 .toList();
     }
 
-    @Transactional
+    // 트랜잭션은 CouponIssueService에 붙어 있기에 여기서는 락만 걸고 실제 발급 로직은 CouponIssueService에 위임
+    // 선착순 쿠폰 발급 (동시성 문제 해결 위해 락 사용)
     public CouponIssueResponse issueCoupon(Long couponId, Long userId) {
-
-        // 쿠폰 조회
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
-
-        // 발급 기간 검증
-        if (!coupon.isAvailableNow(LocalDateTime.now())) {
-            throw new CustomException(ErrorCode.COUPON_NOT_AVAILABLE_TIME);
-        }
-
-        // 중복 발급 검증
-        if (userCouponRepository.existsByUserIdAndCouponId(userId, couponId)) {
-            throw new CustomException(ErrorCode.COUPON_ALREADY_ISSUED);
-        }
-
-        // 수량 검증
-        if (!coupon.hasRemaining()) {
-            throw new CustomException(ErrorCode.COUPON_SOLD_OUT);
-        }
-
-        // 발급 수량 증가
-        coupon.increaseIssuedQuantity();
-
-        // UserCoupon 생성, 저장
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        UserCoupon userCoupon = UserCoupon.issue(user, coupon, LocalDateTime.now());
-        userCouponRepository.save(userCoupon);
-
-        return CouponIssueResponse.from(userCoupon);
+        return lockService.executeWithLock(
+                "coupon:issue:" + couponId,
+                Duration.ofSeconds(3),  // TTL
+                () -> couponIssueService.issueCoupon(couponId, userId)
+        );
     }
 
 }
