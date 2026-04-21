@@ -3,8 +3,11 @@ package com.spartafarmer.agri_commerce.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spartafarmer.agri_commerce.common.enums.UserRole;
 import com.spartafarmer.agri_commerce.common.security.JwtUtil;
-import com.spartafarmer.agri_commerce.domain.auth.dto.request.SigninRequest;
+import com.spartafarmer.agri_commerce.domain.auth.dto.request.SignupRequest;
 import com.spartafarmer.agri_commerce.domain.user.dto.UserUpdateRequest;
+import com.spartafarmer.agri_commerce.domain.user.entity.User;
+import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -31,29 +34,37 @@ public class UserIntegrationTest {
     ObjectMapper objectMapper;
 
     @Autowired
+    UserRepository userRepository;
+
+    @Autowired
     JwtUtil jwtUtil;
 
-    // 로그인해서 토큰 추출하는 헬퍼 메서드
-    private String getToken() throws Exception {
-        SigninRequest request = new SigninRequest("user1@test.com", "password1");
+    @BeforeEach
+    void setUp() throws Exception {
+        SignupRequest request = new SignupRequest(
+                "testuser@test.com",
+                "password1",
+                "테스트유저",
+                "010-1234-5678",
+                "서울시 강남구"
+        );
 
-        String response = mockMvc.perform(post("/api/auth/signin")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        mockMvc.perform(post("/api/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+    }
 
-        return objectMapper.readTree(response)
-                .get("data")
-                .get("accessToken")
-                .asText();
+    private String getToken() {
+        User user = userRepository.findByEmail("testuser@test.com")
+                .orElseThrow();
+        return jwtUtil.createToken(user.getId(), user.getEmail(), user.getRole());
     }
 
     @Test
     void 회원정보_수정_성공() throws Exception {
         // given
         String token = getToken();
+
         UserUpdateRequest request = new UserUpdateRequest(
                 "김아무개",
                 "01087654321",
@@ -93,7 +104,7 @@ public class UserIntegrationTest {
     void 회원정보_수정_실패_유저_없음() throws Exception {
         // given
         // 존재하지 않는 userId로 토큰 생성
-        String token = jwtUtil.createToken(99999L, "ghost@test.com", UserRole.USER);
+        String token = jwtUtil.createToken(Long.MAX_VALUE, "ghost@test.com", UserRole.USER);
 
         UserUpdateRequest request = new UserUpdateRequest(
                 "김아무개",

@@ -33,7 +33,7 @@ public class GlobalExceptionHandlerTest {
         // given - 존재하지 않는 상품 ID
 
         // when
-        ResultActions result = mockMvc.perform(get("/api/products/99999"));
+        ResultActions result = mockMvc.perform(get("/api/products/" + Long.MAX_VALUE));
 
         // then
         result.andExpect(status().isNotFound())

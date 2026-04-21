@@ -3,6 +3,7 @@ package com.spartafarmer.agri_commerce.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.spartafarmer.agri_commerce.domain.auth.dto.request.SigninRequest;
 import com.spartafarmer.agri_commerce.domain.auth.dto.request.SignupRequest;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -26,6 +27,22 @@ public class AuthIntegrationTest {
 
     @Autowired
     ObjectMapper objectMapper;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        // 테스트용 유저 회원가입
+        SignupRequest request = new SignupRequest(
+                "testuser@test.com",
+                "password1",
+                "테스트유저",
+                "010-1234-5678",
+                "서울시 강남구"
+        );
+
+        mockMvc.perform(post("/api/auth/signup")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+    }
 
     @Test
     void 회원가입_성공() throws Exception {
@@ -52,7 +69,7 @@ public class AuthIntegrationTest {
     void 회원가입_실패_이메일중복() throws Exception {
         // given
         SignupRequest request = new SignupRequest(
-                "user1@test.com",
+                "testuser@test.com",
                 "password1",
                 "테스트",
                 "010-1234-5678",
@@ -74,7 +91,7 @@ public class AuthIntegrationTest {
     void 로그인_성공() throws Exception {
         // given
         SigninRequest request = new SigninRequest(
-                "user1@test.com",
+                "testuser@test.com",
                 "password1"
         );
 
@@ -112,7 +129,7 @@ public class AuthIntegrationTest {
     void 로그인_실패_비밀번호틀림() throws Exception {
         // given
         SigninRequest request = new SigninRequest(
-                "user1@test.com",
+                "testuser@test.com",
                 "password2"
         );
 
