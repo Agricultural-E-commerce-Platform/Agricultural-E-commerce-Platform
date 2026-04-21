@@ -29,4 +29,18 @@ jobs:
             docker-compose -f docker-compose.prod.yml pull
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml up -d
-            docker ps
+            
+            # 애플리케이션 기동을 위해 초기 10초 대기
+            sleep 10
+            
+            # 최대 20회(30초) 동안 1.5초 간격으로 헬스체크 재시도 - 10초(초기 대기) + 20회 * 1.5초 = 총 40초
+            for i in $(seq 1 20); do
+              if curl -f http://localhost:8080/actuator/health; then
+                echo "Health check passed!"
+                exit 0
+              fi
+              echo "Waiting for app to start... ($i/20)"
+              sleep 1.5
+            done
+            echo "Health check failed after retries."
+            exit 1
