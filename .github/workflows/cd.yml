@@ -30,8 +30,14 @@ jobs:
             docker-compose -f docker-compose.prod.yml down
             docker-compose -f docker-compose.prod.yml up -d
             
-            # 앱 기동 대기 (30초)
-            sleep 30
-            
-            # 헬스체크 (실패 시 exit 1로 CD 파이프라인 실패로 표시)
-            curl -f http://localhost:8080/actuator/health || exit 1
+            # 최대 20회(30초) 동안 1.5초 간격으로 헬스체크 재시도
+            for i in $(seq 1 20); do
+              if curl -f http://localhost:8080/actuator/health; then
+                echo "Health check passed!"
+                exit 0
+              fi
+              echo "Waiting for app to start... ($i/20)"
+              sleep 1.5
+            done
+            echo "Health check failed after retries."
+            exit 1
