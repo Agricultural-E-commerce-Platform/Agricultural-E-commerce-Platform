@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,4 +28,6 @@ public interface UserCouponRepository extends JpaRepository<UserCoupon, Long> {
     // 사용자 보유 쿠폰 전체 조회 (만료 임박순, Coupon fetch join) -> N+1 해결(Fetch Join)
     @Query("SELECT uc FROM UserCoupon uc JOIN FETCH uc.coupon WHERE uc.user.id = :userId ORDER BY uc.expiredAt ASC")
     List<UserCoupon> findByUserIdOrderByExpiredAtAsc(@Param("userId") Long userId);
+
+    List<UserCoupon> findByStatusAndExpiredAtBefore(CouponStatus couponStatus, LocalDateTime now);  //
 }
