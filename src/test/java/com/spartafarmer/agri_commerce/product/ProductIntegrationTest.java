@@ -2,6 +2,7 @@ package com.spartafarmer.agri_commerce.product;
 
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
+import com.spartafarmer.agri_commerce.common.enums.UserRole;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductDetailResponse;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
@@ -22,7 +23,22 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.spartafarmer.agri_commerce.domain.cart.entity.Cart;
+import com.spartafarmer.agri_commerce.domain.cart.entity.CartItem;
+import com.spartafarmer.agri_commerce.domain.cart.repository.CartRepository;
+import com.spartafarmer.agri_commerce.domain.order.service.OrderService;
+import com.spartafarmer.agri_commerce.domain.user.entity.User;
+import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
+
+import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -42,6 +58,9 @@ class ProductIntegrationTest {
     @Autowired private TimeSaleService timeSaleService;
     @Autowired private TimeSaleScheduleService timeSaleScheduleService;
     @Autowired private Scheduler scheduler;
+    @Autowired private OrderService orderService;
+    @Autowired private UserRepository userRepository;
+    @Autowired private CartRepository cartRepository;
 
     private Product normalProduct;
     private Product onSaleSpecialProduct;
@@ -200,5 +219,75 @@ class ProductIntegrationTest {
 
         JobKey jobKey = JobKey.jobKey("TimeSaleEndJob-" + productId);
         assertThat(scheduler.getTriggersOfJob(jobKey)).hasSize(1);
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    void 주문_재고_차감_동시성_테스트() throws InterruptedException {
+        // given
+        Product product = productRepository.save(Product.create(
+                "동시성 테스트 상품",
+                ProductType.NORMAL,
+                30000L,
+                30000L,
+                null,
+                5,
+                ProductStatus.ON_SALE,
+                null
+        ));
+
+        int threadCount = 10;
+        List<Long> userIds = new ArrayList<>();
+
+        for (int i = 0; i < threadCount; i++) {
+            User user = userRepository.save(User.create(
+                    "concurrency" + i + "@test.com",
+                    "password",
+                    "유저" + i,
+                    "0101234" + String.format("%04d", i),
+                    "서울",
+                    UserRole.USER
+            ));
+            userIds.add(user.getId());
+
+            Cart cart = Cart.create(user);
+            CartItem.create(cart, product, product.getSalePrice(), 1);
+            cartRepository.save(cart);
+        }
+
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CyclicBarrier barrier = new CyclicBarrier(threadCount);
+        CountDownLatch latch = new CountDownLatch(threadCount);
+        ConcurrentLinkedQueue<String> failures = new ConcurrentLinkedQueue<>();
+
+        // when
+        for (Long userId : userIds) {
+            executorService.submit(() -> {
+                try {
+                    barrier.await();
+                    orderService.createOrder(userId, null);
+                } catch (Exception e) {
+                    failures.add(e.getClass().getSimpleName() + ": " + e.getMessage());
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        // then
+        Product result = productRepository.findById(product.getId()).orElseThrow();
+
+        System.out.println("failures = " + failures);
+
+        // 1건만 성공해서 재고 1개만 차감
+        assertThat(result.getStock()).isEqualTo(4);
+
+        // 나머지 9건은 락 획득 실패
+        assertThat(failures).hasSize(9);
+        assertThat(failures)
+                .allMatch(message -> message.contains("요청이 많아 처리할 수 없습니다"));
     }
 }
