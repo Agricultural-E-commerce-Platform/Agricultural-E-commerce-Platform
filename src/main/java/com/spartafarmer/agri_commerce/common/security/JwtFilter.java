@@ -1,6 +1,7 @@
 package com.spartafarmer.agri_commerce.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.common.response.ApiResponse;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -57,7 +58,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // 토큰이 없는 경우 401을 반환
         if (bearerToken == null) {
             log.info("클라이언트 오류 - statusCode: 401, message: JWT 토큰이 필요합니다.");
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "JWT 토큰이 필요합니다.");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorCode.UNAUTHORIZED.getMessage());
             return;
         }
 
@@ -68,7 +69,7 @@ public class JwtFilter extends OncePerRequestFilter {
             // 토큰 서명 검증 + 만료 시간 체크
             if (!jwtUtil.validateToken(token)) {
                 log.info("클라이언트 오류 - statusCode: 401, message: 잘못된 JWT 토큰입니다.");
-                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "잘못된 JWT 토큰입니다.");
+                writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorCode.INVALID_TOKEN.getMessage());
                 return;
             }
 
@@ -87,16 +88,16 @@ public class JwtFilter extends OncePerRequestFilter {
 
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "유효하지 않는 JWT 서명입니다.");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorCode.INVALID_TOKEN.getMessage());
         } catch (ExpiredJwtException e) {
             log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
-            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "만료된 JWT 토큰입니다.");
+            writeErrorResponse(response, HttpServletResponse.SC_UNAUTHORIZED, ErrorCode.EXPIRED_TOKEN.getMessage());
         } catch (UnsupportedJwtException e) {
             log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
-            writeErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, "지원되지 않는 JWT 토큰입니다.");
+            writeErrorResponse(response, HttpServletResponse.SC_BAD_REQUEST, ErrorCode.UNSUPPORTED_TOKEN.getMessage());
         } catch (Exception e) {
             log.error("Internal server error", e);
-            writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "서버 오류가 발생했습니다.");
+            writeErrorResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR, ErrorCode.INTERNAL_SERVER_ERROR.getMessage());
         }
     }
 }
