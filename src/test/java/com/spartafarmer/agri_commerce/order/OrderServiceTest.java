@@ -1,5 +1,8 @@
 package com.spartafarmer.agri_commerce.order;
 
+import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
+import com.spartafarmer.agri_commerce.common.enums.ProductType;
+import com.spartafarmer.agri_commerce.common.enums.UserRole;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.common.lock.LockService;
@@ -9,7 +12,7 @@ import com.spartafarmer.agri_commerce.domain.cart.repository.CartRepository;
 import com.spartafarmer.agri_commerce.domain.order.dto.OrderCreateResponse;
 import com.spartafarmer.agri_commerce.domain.order.dto.OrderListResponse;
 import com.spartafarmer.agri_commerce.domain.order.entity.Order;
-import com.spartafarmer.agri_commerce.domain.order.entity.OrderStatus;
+import com.spartafarmer.agri_commerce.domain.order.entity.OrderItem;
 import com.spartafarmer.agri_commerce.domain.order.repository.OrderRepository;
 import com.spartafarmer.agri_commerce.domain.order.service.OrderCreateService;
 import com.spartafarmer.agri_commerce.domain.order.service.OrderService;
@@ -32,7 +35,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -58,19 +60,25 @@ class OrderServiceTest {
     @Test
     void 주문생성_성공() {
         // given
-        User user = mock(User.class);
-        Cart cart = mock(Cart.class);
-        CartItem cartItem = mock(CartItem.class);
-        Product product = mock(Product.class);
+        User user = User.create(
+                "test@test.com", "pass1234", "테스트유저",
+                "010-1234-5678", "서울", UserRole.USER
+        );
+
+        Product product = Product.create(
+                "사과", ProductType.NORMAL,
+                15000L, 12000L, null,
+                10, ProductStatus.ON_SALE, null
+        );
+
+        Cart cart = Cart.create(user);
+        CartItem.create(cart, product, product.getSalePrice(), 2);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
         given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
-        given(cart.getCartItems()).willReturn(List.of(cartItem));
-        given(cartItem.getProduct()).willReturn(product);
-        given(product.getId()).willReturn(1L);
 
         OrderCreateResponse expected = new OrderCreateResponse(
-                1L, List.of(), 25000L, 0L, 25000L, "COMPLETED", LocalDateTime.now()
+                1L, List.of(), 24000L, 0L, 24000L, "COMPLETED", LocalDateTime.now()
         );
         given(lockService.executeWithLocks(anyList(), any(), any())).willReturn(expected);
 
@@ -78,7 +86,7 @@ class OrderServiceTest {
         OrderCreateResponse result = orderService.createOrder(1L, null);
 
         // then
-        assertThat(result.finalPrice()).isEqualTo(25000L);
+        assertThat(result.finalPrice()).isEqualTo(24000L);
         assertThat(result.status()).isEqualTo("COMPLETED");
     }
 
@@ -97,7 +105,10 @@ class OrderServiceTest {
     @Test
     void 주문생성_실패_장바구니없음() {
         // given
-        User user = mock(User.class);
+        User user = User.create(
+                "test@test.com", "pass1234", "테스트유저",
+                "010-1234-5678", "서울", UserRole.USER
+        );
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
         given(cartRepository.findByUserWithItems(user)).willReturn(Optional.empty());
@@ -112,16 +123,22 @@ class OrderServiceTest {
     @Test
     void 주문목록조회_성공() {
         // given
-        User user = mock(User.class);
-        Order order = mock(Order.class);
+        User user = User.create(
+                "test@test.com", "pass1234", "테스트유저",
+                "010-1234-5678", "서울", UserRole.USER
+        );
+
+        Product product = Product.create(
+                "사과", ProductType.NORMAL,
+                15000L, 12000L, null,
+                10, ProductStatus.ON_SALE, null
+        );
+
+        Order order = Order.create(user, null, 25000L, 0L, 25000L);
+        OrderItem.create(order, product, product.getSalePrice(), 2);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
         given(orderRepository.findAllByUserIdOrderByCreatedAtDesc(anyLong())).willReturn(List.of(order));
-        given(order.getId()).willReturn(1L);
-        given(order.getOrderItems()).willReturn(List.of());
-        given(order.getFinalPrice()).willReturn(25000L);
-        given(order.getStatus()).willReturn(OrderStatus.COMPLETED);
-        given(order.getCreatedAt()).willReturn(LocalDateTime.now());
 
         // when
         List<OrderListResponse> result = orderService.getOrders(1L);
@@ -130,6 +147,8 @@ class OrderServiceTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).finalPrice()).isEqualTo(25000L);
         assertThat(result.get(0).status()).isEqualTo("COMPLETED");
+        assertThat(result.get(0).orderItems()).hasSize(1);
+        assertThat(result.get(0).orderItems().get(0).productName()).isEqualTo("사과");
     }
 
     @Test
