@@ -73,7 +73,7 @@ class CouponIssueServiceTest {
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
                 .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.COUPON_NOT_FOUND.getMessage());
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.COUPON_NOT_FOUND);
     }
 
     @Test
@@ -88,7 +88,7 @@ class CouponIssueServiceTest {
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
                 .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.COUPON_NOT_AVAILABLE_TIME.getMessage());
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.COUPON_NOT_AVAILABLE_TIME);
     }
 
     @Test
@@ -105,7 +105,7 @@ class CouponIssueServiceTest {
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
                 .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.COUPON_ALREADY_ISSUED.getMessage());
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.COUPON_ALREADY_ISSUED);
     }
 
     @Test
@@ -123,7 +123,7 @@ class CouponIssueServiceTest {
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
                 .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.COUPON_SOLD_OUT.getMessage());
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.COUPON_SOLD_OUT);
     }
 
     @Test
@@ -143,6 +143,6 @@ class CouponIssueServiceTest {
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
                 .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.USER_NOT_FOUND.getMessage());
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
     }
 }
