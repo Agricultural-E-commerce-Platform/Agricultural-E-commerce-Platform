@@ -35,12 +35,20 @@ jobs:
             
             # 최대 20회(30초) 동안 1.5초 간격으로 헬스체크 재시도 - 10초(초기 대기) + 20회 * 1.5초 = 총 40초
             for i in $(seq 1 20); do
-              if curl -f http://localhost:8080/actuator/health; then
-                echo "Health check passed!"
+              HTTP_CODE=$(curl -sS -o /tmp/health_response.txt -w "%{http_code}" --max-time 5 http://localhost:8080/actuator/health)
+              
+              if [ "$HTTP_CODE" -eq 200 ]; then
+                echo "✅ Health check passed!"
                 exit 0
               fi
-              echo "Waiting for app to start... ($i/20)"
+            
+              # 200이 아닌 경우 상세 로그 출력 후 다음 루프로 즉시 이동
+              echo "❌ Health check failed with HTTP $HTTP_CODE (attempt $i/20)"
+              cat /tmp/health_response.txt
               sleep 1.5
             done
-            echo "Health check failed after retries."
+            
+            # 20회 재시도 후에도 성공하지 못한 경우
+            echo "🚨 Health check failed after 20 retries."
+            cat /tmp/health_response.txt
             exit 1
