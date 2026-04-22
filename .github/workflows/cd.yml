@@ -35,9 +35,12 @@ jobs:
             
             # 최대 20회(30초) 동안 1.5초 간격으로 헬스체크 재시도 - 10초(초기 대기) + 20회 * 1.5초 = 총 40초
             for i in $(seq 1 20); do
-              if curl -f http://localhost:8080/actuator/health; then
+              RESPONSE=$(curl -s http://localhost:8080/actuator/health)
+              if echo "$RESPONSE" | grep -q '"status":"UP"'; then
                 echo "Health check passed!"
                 exit 0
+              else
+                echo "Health check response: $RESPONSE"
               fi
               echo "Waiting for app to start... ($i/20)"
               sleep 1.5
