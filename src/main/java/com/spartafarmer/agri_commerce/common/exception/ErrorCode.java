@@ -13,19 +13,19 @@ public enum ErrorCode {
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "잘못된 요청입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+    METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED, "지원하지 않는 HTTP 메서드입니다."),
+    DUPLICATE_DATA(HttpStatus.CONFLICT, "중복된 데이터입니다."),
 
     // JWT
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    UNSUPPORTED_TOKEN(HttpStatus.BAD_REQUEST, "지원하지 않는 토큰입니다."),
 
     // 회원
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
     USER_DUPLICATE_EMAIL(HttpStatus.CONFLICT, "중복된 이메일입니다."),
     USER_INVALID_LOGIN(HttpStatus.BAD_REQUEST, "이메일 또는 비밀번호가 틀렸습니다."),
-    USER_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호는 영문, 숫자 포함 8~12자리여야 합니다."),
-    USER_INVALID_EMAIL(HttpStatus.BAD_REQUEST, "이메일 형식이 올바르지 않습니다."),
     USER_INVALID_PHONE(HttpStatus.BAD_REQUEST, "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx 또는 010xxxxxxxx)"),
-    USER_WITHDRAWN(HttpStatus.UNAUTHORIZED, "탈퇴한 회원입니다."),
 
     // 상품
     PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
