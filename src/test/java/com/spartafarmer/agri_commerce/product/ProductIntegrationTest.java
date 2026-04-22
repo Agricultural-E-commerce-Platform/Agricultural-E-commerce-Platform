@@ -21,15 +21,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Tag("integration")
-@SpringBootTest
+@SpringBootTest(properties = {
+        "jwt.secret.key=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
+})
 @Transactional
 class ProductIntegrationTest {
 
@@ -39,188 +43,161 @@ class ProductIntegrationTest {
     @Autowired private TimeSaleScheduleService timeSaleScheduleService;
     @Autowired private Scheduler scheduler;
 
+    private Product normalProduct;
+    private Product onSaleSpecialProduct;
+    private Product readySpecialProduct;
+    private Product hiddenProduct;
+
     @BeforeEach
     void setUp() {
-        productRepository.deleteAll();
-
         // 일반 상품
-        productRepository.save(Product.create(
+        normalProduct = productRepository.save(Product.create(
                 "제주 감귤", ProductType.NORMAL,
                 15000L, 12000L, null,
                 100, ProductStatus.ON_SALE, null
         ));
+
         // 특가 ON_SALE
-        productRepository.save(Product.create(
+        onSaleSpecialProduct = productRepository.save(Product.create(
                 "한우 특가", ProductType.SPECIAL,
                 50000L, 50000L, 30000L,
                 20, ProductStatus.ON_SALE, null
         ));
+
         // 특가 READY
-        productRepository.save(Product.create(
+        readySpecialProduct = productRepository.save(Product.create(
                 "딸기 특가", ProductType.SPECIAL,
                 20000L, 20000L, 15000L,
                 50, ProductStatus.READY, null
         ));
+
         // HIDDEN
-        productRepository.save(Product.create(
+        hiddenProduct = productRepository.save(Product.create(
                 "비공개 상품", ProductType.NORMAL,
                 10000L, 10000L, null,
                 10, ProductStatus.HIDDEN, null
         ));
-    }
 
-    // ===== 상품 목록 조회 =====
+        // 내가 만든 테스트 데이터가 첫 페이지 최상단에 오도록 createdAt을 미래로 설정
+        LocalDateTime future = LocalDateTime.now().plusDays(1);
+
+        ReflectionTestUtils.setField(normalProduct, "createdAt", future.plusSeconds(1));
+        ReflectionTestUtils.setField(onSaleSpecialProduct, "createdAt", future.plusSeconds(2));
+        ReflectionTestUtils.setField(readySpecialProduct, "createdAt", future.plusSeconds(3));
+        ReflectionTestUtils.setField(hiddenProduct, "createdAt", future.plusSeconds(4));
+    }
 
     @Test
     void 전체_상품_목록_조회_성공() {
-        // given
         PageRequest pageable = PageRequest.of(0, 10);
 
-        // when
         Page<ProductListResponse> result = productService.getProducts(null, pageable);
 
-        // then - HIDDEN 제외, READY 포함 → 3개
-        assertThat(result.getContent()).hasSize(3);
+        List<String> names = result.getContent().stream()
+                .map(ProductListResponse::name)
+                .toList();
+
+        assertThat(names).contains("제주 감귤", "한우 특가", "딸기 특가");
+        assertThat(names).doesNotContain("비공개 상품");
+
         assertThat(result.getContent())
                 .noneMatch(p -> p.status() == ProductStatus.HIDDEN);
     }
 
     @Test
     void 특가_상품_목록_조회_HIDDEN_제외_성공() {
-        // given
         PageRequest pageable = PageRequest.of(0, 10);
 
-        // when - type=SPECIAL이면 HIDDEN만 제외하고 반환 (READY 포함)
         Page<ProductListResponse> result = productService.getProducts(ProductType.SPECIAL, pageable);
 
-        // then - SPECIAL 타입 중 HIDDEN 제외 → ON_SALE + READY = 2개
-        assertThat(result.getContent()).hasSize(2);
+        List<String> names = result.getContent().stream()
+                .map(ProductListResponse::name)
+                .toList();
+
+        assertThat(names).contains("한우 특가", "딸기 특가");
+        assertThat(names).doesNotContain("비공개 상품");
+
+        assertThat(result.getContent())
+                .allMatch(p -> p.type() == ProductType.SPECIAL);
+
         assertThat(result.getContent())
                 .noneMatch(p -> p.status() == ProductStatus.HIDDEN);
     }
 
-
-    // ===== 상품 상세 조회 =====
-
     @Test
     void 상품_상세_조회_성공() {
-        // given
-        Product product = productRepository.findAll().stream()
-                .filter(p -> p.getStatus() == ProductStatus.ON_SALE)
-                .findFirst().get();
+        ProductDetailResponse result = productService.getProduct(normalProduct.getId());
 
-        // when
-        ProductDetailResponse result = productService.getProduct(product.getId());
-
-        // then
         assertThat(result.name()).isEqualTo("제주 감귤");
     }
 
     @Test
     void 상품_상세_조회_READY_상품_조회_성공() {
-        // given
-        Product readyProduct = productRepository.findAll().stream()
-                .filter(p -> p.getStatus() == ProductStatus.READY)
-                .findFirst().get();
+        ProductDetailResponse result = productService.getProduct(readySpecialProduct.getId());
 
-        // when
-        ProductDetailResponse result = productService.getProduct(readyProduct.getId());
-
-        // then - READY 상태도 상세 조회 가능
         assertThat(result.status()).isEqualTo(ProductStatus.READY);
     }
 
     @Test
     void 상품_상세_조회_실패_HIDDEN_상품() {
-        // given
-        Product hiddenProduct = productRepository.findAll().stream()
-                .filter(p -> p.getStatus() == ProductStatus.HIDDEN)
-                .findFirst().get();
-
-        // when & then
         assertThatThrownBy(() -> productService.getProduct(hiddenProduct.getId()))
                 .isInstanceOf(CustomException.class);
     }
 
     @Test
     void 상품_상세_조회_실패_없는상품() {
-        // when & then
-        assertThatThrownBy(() -> productService.getProduct(9999L))
+        Long notExistId = Long.MAX_VALUE;
+
+        assertThatThrownBy(() -> productService.getProduct(notExistId))
                 .isInstanceOf(CustomException.class);
     }
 
-    // ===== 타임세일 =====
-
     @Test
     void 타임세일_시작_재고있으면_ON_SALE_성공() {
-        // given
-        Product product = productRepository.findAll().stream()
-                .filter(p -> p.getStatus() == ProductStatus.READY)
-                .findFirst().get();
+        timeSaleService.startProductSale(readySpecialProduct.getId());
 
-        // when
-        timeSaleService.startProductSale(product.getId());
-
-        // then
-        assertThat(product.getStatus()).isEqualTo(ProductStatus.ON_SALE);
+        assertThat(readySpecialProduct.getStatus()).isEqualTo(ProductStatus.ON_SALE);
     }
 
     @Test
     void 타임세일_시작_재고없으면_SOLD_OUT_성공() {
-        // given - 재고 0인 READY 상품 저장
-        Product product = productRepository.save(Product.create(
+        Product zeroStockReadyProduct = productRepository.save(Product.create(
                 "재고없는 특가", ProductType.SPECIAL,
                 20000L, 20000L, 15000L,
                 0, ProductStatus.READY, null
         ));
 
-        // when
-        timeSaleService.startProductSale(product.getId());
+        timeSaleService.startProductSale(zeroStockReadyProduct.getId());
 
-        // then
-        assertThat(product.getStatus()).isEqualTo(ProductStatus.SOLD_OUT);
+        assertThat(zeroStockReadyProduct.getStatus()).isEqualTo(ProductStatus.SOLD_OUT);
     }
 
     @Test
     void 타임세일_종료_SALE_ENDED_성공() {
-        // given
-        Product product = productRepository.findAll().stream()
-                .filter(p -> p.getStatus() == ProductStatus.ON_SALE
-                        && p.getType() == ProductType.SPECIAL)
-                .findFirst().get();
+        timeSaleService.endProductSale(onSaleSpecialProduct.getId());
 
-        // when
-        timeSaleService.endProductSale(product.getId());
-
-        // then
-        assertThat(product.getStatus()).isEqualTo(ProductStatus.SALE_ENDED);
+        assertThat(onSaleSpecialProduct.getStatus()).isEqualTo(ProductStatus.SALE_ENDED);
     }
 
     @Test
     void Quartz_Job_등록_성공() throws Exception {
-        // given
         Long productId = 999L;
         LocalDateTime scheduleTime = LocalDateTime.now().plusSeconds(10);
 
-        // when
         timeSaleScheduleService.scheduleJob(TimeSaleStartJob.class, productId, scheduleTime);
 
-        // then
         JobKey jobKey = JobKey.jobKey("TimeSaleStartJob-" + productId);
         assertThat(scheduler.checkExists(jobKey)).isTrue();
     }
 
     @Test
     void Quartz_Job_중복_등록_방지_성공() throws Exception {
-        // given
         Long productId = 998L;
         LocalDateTime scheduleTime = LocalDateTime.now().plusSeconds(10);
 
-        // when - 같은 productId로 두 번 호출
         timeSaleScheduleService.scheduleJob(TimeSaleEndJob.class, productId, scheduleTime);
         timeSaleScheduleService.scheduleJob(TimeSaleEndJob.class, productId, scheduleTime);
 
-        // then - 트리거 1개만 존재
         JobKey jobKey = JobKey.jobKey("TimeSaleEndJob-" + productId);
         assertThat(scheduler.getTriggersOfJob(jobKey)).hasSize(1);
     }
