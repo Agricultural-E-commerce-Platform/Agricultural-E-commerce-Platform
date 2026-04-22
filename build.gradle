@@ -35,7 +35,8 @@ dependencies {
 
 	// ===== Test =====
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'     // 테스트 기본 라이브러리
-	testImplementation 'org.springframework.security:spring-security-test'     // Security 테스트
+	testImplementation 'org.springframework.security:spring-security-test'
+    runtimeOnly 'com.h2database:h2'// Security 테스트
 	testCompileOnly 'org.projectlombok:lombok'              // 테스트에서 Lombok 사용
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'               // JUnit 실행기
 	testAnnotationProcessor 'org.projectlombok:lombok'      // 테스트에서 Lombok 어노테이션 처리
