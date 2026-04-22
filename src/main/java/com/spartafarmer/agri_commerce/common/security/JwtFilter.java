@@ -55,7 +55,7 @@ public class JwtFilter extends OncePerRequestFilter {
         try {
             // 토큰 서명 검증 + 만료 시간 체크
             if (!jwtUtil.validateToken(token)) {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "잘못된 JWT 토큰입니다.");
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "잘못된 JWT 토큰입니다.");
                 return;
             }
 
