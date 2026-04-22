@@ -121,6 +121,35 @@ class OrderServiceTest {
     }
 
     @Test
+    void 주문생성_실패_최소주문금액미만() {
+        // given
+        User user = User.create(
+                "test@test.com", "pass1234", "테스트유저",
+                "010-1234-5678", "서울", UserRole.USER
+        );
+
+        Product product = Product.create(
+                "사과", ProductType.NORMAL,
+                10000L, 8000L, null,
+                10, ProductStatus.ON_SALE, null
+        );
+
+        Cart cart = Cart.create(user);
+        CartItem.create(cart, product, product.getSalePrice(), 1);
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
+        given(lockService.executeWithLocks(anyList(), any(), any()))
+                .willThrow(new CustomException(ErrorCode.MIN_ORDER_AMOUNT_NOT_MET));
+
+        // when & then
+        assertThatThrownBy(() -> orderService.createOrder(1L, null))
+                .isInstanceOf(CustomException.class)
+                .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
+                        .isEqualTo(ErrorCode.MIN_ORDER_AMOUNT_NOT_MET));
+    }
+
+    @Test
     void 주문목록조회_성공() {
         // given
         User user = User.create(

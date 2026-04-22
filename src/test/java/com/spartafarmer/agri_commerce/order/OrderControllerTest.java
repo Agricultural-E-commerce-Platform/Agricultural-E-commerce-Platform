@@ -99,6 +99,22 @@ class OrderControllerTest {
     }
 
     @Test
+    void 주문생성_실패_최소주문금액미만() throws Exception {
+        // given
+        given(orderService.createOrder(anyLong(), isNull()))
+                .willThrow(new CustomException(ErrorCode.MIN_ORDER_AMOUNT_NOT_MET));
+
+        // when & then
+        mockMvc.perform(post("/api/orders")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new OrderCreateRequest(null))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("최소 주문 금액은 20,000원 이상입니다."));
+    }
+
+    @Test
     void 주문목록조회_성공() throws Exception {
         // given
         OrderListResponse response = new OrderListResponse(1L, List.of(), 25000L, "COMPLETED", LocalDateTime.now());
