@@ -45,9 +45,30 @@ public class JwtFilter extends OncePerRequestFilter {
         if(url.startsWith("/api/auth")
                 || url.startsWith("/api/products")
                 || url.startsWith("/api/v1/products")
-                || url.startsWith("/api/v2/products")
                 || url.startsWith("/actuator/health")
         ) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // v2 검색은 선택적 인증 (토큰 있으면 인증, 없으면 그냥 통과)
+        if(url.startsWith("/api/v2/products")) {
+            String bearerToken = request.getHeader("Authorization");
+            if (bearerToken != null) {
+                String token = jwtUtil.extractToken(bearerToken);
+                try {
+                    if (jwtUtil.validateToken(token)) {
+                        AuthUser authUser = new AuthUser(
+                                jwtUtil.getUserIdFromToken(token),
+                                jwtUtil.getUserEmailFromToken(token),
+                                jwtUtil.getUserRoleFromToken(token)
+                        );
+                        SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities())
+                        );
+                    }
+                } catch (Exception ignored) {} // 비로그인으로 검색 허용 (예외 무시)
+            }
             filterChain.doFilter(request, response);
             return;
         }
