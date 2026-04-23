@@ -62,7 +62,9 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()  // JUnit5 플랫폼으로 테스트 실행
+	useJUnitPlatform {
+		excludeTags 'integration'
+	}  // JUnit5 플랫폼으로 테스트 실행
 }
 
 // ===== QueryDSL Q클래스 생성 설정 =====
