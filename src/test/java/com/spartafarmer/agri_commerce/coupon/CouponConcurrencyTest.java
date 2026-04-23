@@ -9,6 +9,7 @@ import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Tag("integration")
 @SpringBootTest
 @ActiveProfiles("test")
 public class CouponConcurrencyTest {
