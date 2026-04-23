@@ -39,9 +39,9 @@ jobs:
       - name: Gradle 권한 설정
         run: chmod +x gradlew
 
-      # 테스트 코드 컴파일 및 실행을 모두 건너뛰고 바이너리만 생성
-      - name: Gradle 빌드 (assemble)
-        run: ./gradlew assemble
+      # 단위테스트 실행 후 바이너리 생성 (통합테스트 제외)
+      - name: Gradle 빌드 (build)
+        run: ./gradlew build
 
       # main 브랜치일 때만 Docker Hub 로그인
       - name: Docker Hub 로그인

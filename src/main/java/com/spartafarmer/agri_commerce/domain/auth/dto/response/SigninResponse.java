@@ -1,15 +1,13 @@
 package com.spartafarmer.agri_commerce.domain.auth.dto.response;
 
-import lombok.Getter;
 
-@Getter
-public class SigninResponse {
+public record SigninResponse (
 
-    private final String accessToken;
-    private final String tokenType;
+        String accessToken,
+        String tokenType
 
+){
     public SigninResponse(String accessToken) {
-        this.accessToken = accessToken;
-        this.tokenType = "Bearer";
+        this(accessToken, "Bearer");
     }
 }
