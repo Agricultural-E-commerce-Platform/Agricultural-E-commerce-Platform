@@ -9,11 +9,8 @@ import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponIssueResp
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.CouponListResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.dto.response.UserCouponResponse;
 import com.spartafarmer.agri_commerce.domain.coupon.entity.Coupon;
-import com.spartafarmer.agri_commerce.domain.coupon.entity.UserCoupon;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.CouponRepository;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.UserCouponRepository;
-import com.spartafarmer.agri_commerce.domain.user.entity.User;
-import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
