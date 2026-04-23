@@ -36,6 +36,19 @@ public class JwtFilter extends OncePerRequestFilter {
         );
     }
 
+    private void setAuthentication(String token) {
+        // 토큰에서 사용자 정보 추출 후 AuthUser 객체 생성
+        AuthUser authUser = new AuthUser(
+                jwtUtil.getUserIdFromToken(token),
+                jwtUtil.getUserEmailFromToken(token),
+                jwtUtil.getUserRoleFromToken(token)
+        );
+        // SecurityContext에 인증 정보 저장 → 이후 @AuthenticationPrincipal로 꺼낼 수 있음
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities())
+        );
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -45,7 +58,6 @@ public class JwtFilter extends OncePerRequestFilter {
         if(url.startsWith("/api/auth")
                 || url.startsWith("/api/products")
                 || url.startsWith("/api/v1/products")
-                || url.startsWith("/api/v2/products")
                 || url.startsWith("/actuator/health")
         ) {
             filterChain.doFilter(request, response);
@@ -54,6 +66,18 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Authorization 헤더에서 Bearer 토큰 추출
         String bearerToken = request.getHeader("Authorization");
+
+        // v2 검색은 선택적 인증 (토큰 있으면 인증, 없으면 그냥 통과)
+        if(url.startsWith("/api/v2/products")) {
+            if (bearerToken != null) {
+                String token = jwtUtil.extractToken(bearerToken);
+                if (token != null && jwtUtil.validateToken(token)) {
+                    setAuthentication(token);
+                }
+            }
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 토큰이 없는 경우 401을 반환
         if (bearerToken == null) {
@@ -73,16 +97,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // 토큰에서 사용자 정보 추출 후 AuthUser 객체 생성
-            AuthUser authUser = new AuthUser(
-                    jwtUtil.getUserIdFromToken(token),
-                    jwtUtil.getUserEmailFromToken(token),
-                    jwtUtil.getUserRoleFromToken(token)
-            );
-            // SecurityContext에 인증 정보 저장 → 이후 @AuthenticationPrincipal로 꺼낼 수 있음
-            SecurityContextHolder.getContext().setAuthentication(
-                    new UsernamePasswordAuthenticationToken(authUser, null, authUser.getAuthorities())
-            );
+            setAuthentication(token);
+
             // 다음 필터로 요청 전달
             filterChain.doFilter(request, response);
 
