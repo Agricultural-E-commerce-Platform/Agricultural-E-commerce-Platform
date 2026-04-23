@@ -43,10 +43,11 @@ public class CouponIssueService {
             throw new CustomException(ErrorCode.COUPON_SOLD_OUT);
         }
 
-        // 모든 검증 통과 후 상태 변경 시작
         // UserCoupon 생성 시 연관관계만 필요하므로 프록시로 조회 (SELECT 쿼리 생략)
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
+        // 모든 검증 통과 후 상태 변경
         coupon.increaseIssuedQuantity();
 
         UserCoupon userCoupon = UserCoupon.issue(user, coupon, LocalDateTime.now());
