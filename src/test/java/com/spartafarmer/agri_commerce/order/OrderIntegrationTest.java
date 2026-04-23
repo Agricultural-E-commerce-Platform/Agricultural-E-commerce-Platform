@@ -16,7 +16,7 @@ import com.spartafarmer.agri_commerce.domain.coupon.repository.CouponRepository;
 import com.spartafarmer.agri_commerce.domain.coupon.repository.UserCouponRepository;
 import com.spartafarmer.agri_commerce.domain.order.dto.OrderCreateRequest;
 import com.spartafarmer.agri_commerce.domain.order.entity.Order;
-import com.spartafarmer.agri_commerce.domain.order.entity.OrderStatus;
+import com.spartafarmer.agri_commerce.common.enums.OrderStatus;
 import com.spartafarmer.agri_commerce.domain.order.repository.OrderRepository;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
 import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepository;
@@ -357,7 +357,7 @@ public class OrderIntegrationTest {
     }
 
     @Test
-    void 주문생성_실패_특가상품포함으로쿠폰사용불가() throws Exception {
+    void 주문생성_실패_특가상품포함_쿠폰사용불가() throws Exception {
         // given
         Product specialProduct = 상품저장("특가 딸기", 25000L, 20000L, 10, ProductStatus.ON_SALE, 12000L);
 
