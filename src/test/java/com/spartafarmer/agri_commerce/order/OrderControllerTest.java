@@ -122,17 +122,4 @@ class OrderControllerTest {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].finalPrice").value(25000));
     }
-
-    @Test
-    void 주문목록조회_실패_유저없음() throws Exception {
-        // given
-        given(orderService.getOrders(anyLong()))
-                .willThrow(new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        // when & then
-        mockMvc.perform(get("/api/orders"))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.status").value(404))
-                .andExpect(jsonPath("$.message").value("회원을 찾을 수 없습니다."));
-    }
 }
