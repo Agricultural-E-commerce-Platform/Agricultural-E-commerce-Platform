@@ -129,20 +129,22 @@ class CouponIssueServiceTest {
     @Test
     @DisplayName("실패: 존재하지 않는 유저 ID로 발급 요청 시 예외를 던진다.")
     void issueCoupon_실패_유저_없음() {
+        // given
+        Long couponId = 1L;
+        Long userId = 999L;
+
         Coupon coupon = mock(Coupon.class);
 
-        given(couponRepository.findById(any()))
-                .willReturn(Optional.of(coupon));
+        given(couponRepository.findById(couponId)).willReturn(Optional.of(coupon));
         given(coupon.isAvailableNow(any())).willReturn(true);
-        given(userCouponRepository.existsByUserIdAndCouponId(any(), any()))
-                .willReturn(false);
+        given(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).willReturn(false);
         given(coupon.hasRemaining()).willReturn(true);
-        given(userRepository.findById(any()))
-                .willReturn(Optional.empty());
+        given(userRepository.findById(userId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() ->
-                couponIssueService.issueCoupon(1L, 1L))
+        // when & then
+        assertThatThrownBy(() -> couponIssueService.issueCoupon(couponId, userId))
                 .isInstanceOf(CustomException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
     }
+
 }

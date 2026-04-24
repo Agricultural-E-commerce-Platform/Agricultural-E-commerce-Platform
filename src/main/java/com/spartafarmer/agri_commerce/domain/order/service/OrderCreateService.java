@@ -26,35 +26,78 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional
 public class OrderCreateService {
+    // 최소 주문 금액
+    private static final long MIN_ORDER_AMOUNT = 20_000L;
 
     private final UserRepository userRepository;
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final UserCouponRepository userCouponRepository;
 
+    /**
+     * 주문 생성 전체 흐름
+     * - 사용자/장바구니 조회
+     * - 상품 검증 및 총액 계산
+     * - 쿠폰 검증 및 할인 적용
+     * - 최소 주문 금액 검증
+     * - 주문 생성 및 재고 차감
+     * - 쿠폰 사용 처리 및 장바구니 비우기
+    */
+
+
     public OrderCreateResponse createOrder(Long userId, Long userCouponId) {
+        User user = getUser(userId);
+        Cart cart = getCart(user);
+        List<CartItem> cartItems = getCartItems(cart);
 
-        User user = userRepository.findById(userId)
+        boolean hasCoupon = userCouponId != null;
+        long totalPrice = calculateTotalPrice(cartItems, hasCoupon);
+
+        UserCoupon userCoupon = getValidatedUserCoupon(userCouponId, userId);
+        long discountPrice = getDiscountPrice(userCoupon);
+        long finalPrice = calculateFinalPrice(totalPrice, discountPrice);
+
+        Order order = Order.create(user, userCoupon, totalPrice, discountPrice, finalPrice);
+        createOrderItemsAndDecreaseStock(order, cartItems);
+
+        orderRepository.save(order);
+
+        useCouponIfPresent(userCoupon);
+        cart.clearCartItems();
+
+        return toResponse(order);
+    }
+
+    // 사용자 조회
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+    }
 
-        Cart cart = cartRepository.findByUser(user)
+    // 장바구니 조회
+    private Cart getCart(User user) {
+        return cartRepository.findByUser(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
+    }
 
+    // 장바구니 아이템 조회 및 비어있는지 검증
+    private List<CartItem> getCartItems(Cart cart) {
         List<CartItem> cartItems = cart.getCartItems();
-
         if (cartItems.isEmpty()) {
             throw new CustomException(ErrorCode.CART_EMPTY);
         }
+        return cartItems;
+    }
 
+    // 상품 검증 및 총 주문 금액 계산
+    private long calculateTotalPrice(List<CartItem> cartItems, boolean hasCoupon) {
         long totalPrice = 0L;
-        boolean hasCoupon = (userCouponId != null);
 
-        // 상품 검증 + 금액 계산
         for (CartItem item : cartItems) {
             Product product = item.getProduct();
-
+            // 상품 주문 가능 여부 검증 (재고, 상태)
             product.validateOrderable(item.getQuantity());
-
+            // 특가 상품 포함 시 쿠폰 사용 불가
             if (hasCoupon && product.getSpecialPrice() != null) {
                 throw new CustomException(ErrorCode.COUPON_NOT_APPLICABLE);
             }
@@ -62,60 +105,70 @@ public class OrderCreateService {
             totalPrice += product.getSalePrice() * item.getQuantity();
         }
 
-        // 쿠폰 처리
-        UserCoupon userCoupon = null;
-        long discountPrice = 0L;
+        return totalPrice;
+    }
 
-        if (hasCoupon) {
-            userCoupon = userCouponRepository.findById(userCouponId)
-                    .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
-
-            userCoupon.validateUsable(LocalDateTime.now());
-            discountPrice = userCoupon.getCoupon().getDiscountAmount();
+    // 쿠폰 조회 및 사용 가능 여부 검증
+    private UserCoupon getValidatedUserCoupon(Long userCouponId, Long userId) {
+        if (userCouponId == null) {
+            return null;
         }
 
+        UserCoupon userCoupon = userCouponRepository.findByIdAndUserId(userCouponId, userId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COUPON_NOT_FOUND));
+
+        userCoupon.validateUsable(LocalDateTime.now());
+        return userCoupon;
+    }
+
+    // 할인 금액 계산
+    private long getDiscountPrice(UserCoupon userCoupon) {
+        if (userCoupon == null) {
+            return 0L;
+        }
+        return userCoupon.getCoupon().getDiscountAmount();
+    }
+
+    // 최종 결제 금액 계산 및 최소 주문 금액 검증
+    private long calculateFinalPrice(long totalPrice, long discountPrice) {
         long finalPrice = totalPrice - discountPrice;
 
-        if (finalPrice < 20000) {
+        if (finalPrice < MIN_ORDER_AMOUNT) {
             throw new CustomException(ErrorCode.MIN_ORDER_AMOUNT_NOT_MET);
         }
 
-        // 주문 생성
-        Order order = Order.create(user, userCoupon, totalPrice, discountPrice, finalPrice);
+        return finalPrice;
+    }
 
-        // 주문 아이템 + 재고 차감
+    // 주문 상품 생성 및 재고 차감
+    private void createOrderItemsAndDecreaseStock(Order order, List<CartItem> cartItems) {
         for (CartItem item : cartItems) {
-            Product product = item.getProduct();
-
-            product.decreaseStock(item.getQuantity());
-
-            OrderItem.create(
-                    order,
-                    product,
-                    product.getSalePrice(),
-                    item.getQuantity()
-            );
+                Product product = item.getProduct();
+                // 재고 차감
+                product.decreaseStock(item.getQuantity());
+                // 주문 상품 생성
+                OrderItem.create(
+                        order,
+                        product,
+                        product.getSalePrice(),
+                        item.getQuantity()
+                );
         }
+    }
 
-        orderRepository.save(order);
-
-        // 쿠폰 사용 처리
+    // 쿠폰 사용 처리
+    private void useCouponIfPresent(UserCoupon userCoupon) {
         if (userCoupon != null) {
             userCoupon.use();
         }
+    }
 
-        // 주문 완료 후 장바구니 비우기
-        cart.clearCartItems();
-
+    // 주문 응답 DTO 변환
+    private OrderCreateResponse toResponse(Order order) {
         return new OrderCreateResponse(
                 order.getId(),
                 order.getOrderItems().stream()
-                        .map(i -> new OrderItemResponse(
-                                i.getProduct().getName(),
-                                i.getQuantity(),
-                                i.getPrice(),
-                                i.getPrice() * i.getQuantity()
-                        ))
+                        .map(OrderItemResponse::from)
                         .toList(),
                 order.getTotalPrice(),
                 order.getDiscountPrice(),

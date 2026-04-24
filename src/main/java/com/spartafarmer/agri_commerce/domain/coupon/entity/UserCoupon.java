@@ -23,6 +23,12 @@ import java.time.LocalDateTime;
 )
 public class UserCoupon extends BaseEntity {
 
+    // 만료일-> 발급일 포함 5일
+    private static final int EXPIRE_DAYS_AFTER_ISSUE = 4;
+    private static final int EXPIRE_HOUR = 23;
+    private static final int EXPIRE_MINUTE = 59;
+    private static final int EXPIRE_SECOND = 59;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,9 +60,9 @@ public class UserCoupon extends BaseEntity {
 
     // 쿠폰 발급
     public static UserCoupon issue(User user, Coupon coupon, LocalDateTime issuedAt) {
-
-        LocalDateTime expiredAt = issuedAt.toLocalDate().plusDays(4)
-                .atTime(23, 59, 59);
+        LocalDateTime expiredAt = issuedAt.toLocalDate()
+                .plusDays(EXPIRE_DAYS_AFTER_ISSUE)
+                .atTime(EXPIRE_HOUR, EXPIRE_MINUTE, EXPIRE_SECOND);
         return new UserCoupon(user, coupon, expiredAt);
     }
 
