@@ -51,7 +51,7 @@ class CouponIssueServiceTest {
         given(couponRepository.findById(couponId)).willReturn(Optional.of(coupon));
         given(coupon.isAvailableNow(any())).willReturn(true);
         given(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).willReturn(false);
-        given(coupon.hasRemaining()).willReturn(true);
+        given(couponRepository.increaseIssuedQuantityIfAvailable(couponId)).willReturn(1);
         given(userRepository.findById(userId)).willReturn(Optional.of(user));
 
         given(userCouponRepository.save(any())).willReturn(userCoupon);
@@ -61,7 +61,7 @@ class CouponIssueServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        verify(coupon).increaseIssuedQuantity();
+        verify(couponRepository).increaseIssuedQuantityIfAvailable(couponId);
     }
 
     @Test
@@ -118,7 +118,7 @@ class CouponIssueServiceTest {
         given(coupon.isAvailableNow(any())).willReturn(true);
         given(userCouponRepository.existsByUserIdAndCouponId(any(), any()))
                 .willReturn(false);
-        given(coupon.hasRemaining()).willReturn(false);
+        given(couponRepository.increaseIssuedQuantityIfAvailable(any())).willReturn(0);
 
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
@@ -138,7 +138,7 @@ class CouponIssueServiceTest {
         given(couponRepository.findById(couponId)).willReturn(Optional.of(coupon));
         given(coupon.isAvailableNow(any())).willReturn(true);
         given(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).willReturn(false);
-        given(coupon.hasRemaining()).willReturn(true);
+        given(couponRepository.increaseIssuedQuantityIfAvailable(couponId)).willReturn(1);
         given(userRepository.findById(userId)).willReturn(Optional.empty());
 
         // when & then
