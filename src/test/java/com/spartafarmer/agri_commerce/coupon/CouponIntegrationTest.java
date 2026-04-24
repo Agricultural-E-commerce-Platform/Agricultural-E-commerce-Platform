@@ -158,6 +158,46 @@ public class CouponIntegrationTest {
     }
 
     @Test
+    void 쿠폰_생성_실패_할인금액_음수() throws Exception {
+        CouponCreateRequest request = new CouponCreateRequest(
+                "음수 쿠폰",
+                -1000L,
+                100,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)
+        );
+
+        ResultActions result = mockMvc.perform(post("/api/coupons")
+                .header("Authorization", bearerToken(adminToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("할인 금액은 1원 이상이어야 합니다."));
+    }
+
+    @Test
+    void 쿠폰_생성_실패_할인금액_0() throws Exception {
+        CouponCreateRequest request = new CouponCreateRequest(
+                "0원 쿠폰",
+                0L,
+                100,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)
+        );
+
+        ResultActions result = mockMvc.perform(post("/api/coupons")
+                .header("Authorization", bearerToken(adminToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
+
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("할인 금액은 1원 이상이어야 합니다."));
+    }
+
+    @Test
     void 쿠폰_생성_실패_일반유저_권한없음() throws Exception {
         // given
         CouponCreateRequest request = new CouponCreateRequest(
