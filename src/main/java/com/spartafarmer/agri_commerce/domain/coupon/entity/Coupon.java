@@ -63,11 +63,6 @@ public class Coupon extends BaseEntity {
         this.issuedQuantity++;
     }
 
-    // 잔여 수량 확인
-    public boolean hasRemaining() {
-        return this.issuedQuantity < this.totalQuantity;
-    }
-
     // 발급 가능 시간 확인
     public boolean isAvailableNow(LocalDateTime now) {
         return !now.isBefore(startTime) && !now.isAfter(endTime);
