@@ -61,10 +61,18 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator' // 서버 상태 모니터링
 }
 
+// ===== 테스트 관련 설정 =====
 tasks.named('test') {
 	useJUnitPlatform {
-		excludeTags 'integration'
+		excludeTags 'integration'  // 단위테스트만 실행
 	}  // JUnit5 플랫폼으로 테스트 실행
+}
+
+tasks.register('integrationTest', Test) {
+	useJUnitPlatform {
+		includeTags 'integration'  // 통합테스트만 실행
+	}
+	shouldRunAfter test
 }
 
 // ===== QueryDSL Q클래스 생성 설정 =====
