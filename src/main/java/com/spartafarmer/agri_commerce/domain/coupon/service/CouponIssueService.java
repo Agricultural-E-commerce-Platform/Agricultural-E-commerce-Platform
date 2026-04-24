@@ -47,11 +47,8 @@ public class CouponIssueService {
         }
 
         // UserCoupon 생성 시 연관관계만 필요하므로 프록시로 조회 (SELECT 쿼리 생략)
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
-
-        // 모든 검증 통과 후 상태 변경
-        coupon.increaseIssuedQuantity();
+        // JWT 인증을 통과한 userId라 존재 검증 불필요
+        User user = userRepository.getReferenceById(userId);
 
         UserCoupon userCoupon = UserCoupon.issue(user, coupon, LocalDateTime.now());
         userCouponRepository.save(userCoupon);
