@@ -39,7 +39,10 @@ public class CouponIssueService {
             throw new CustomException(ErrorCode.COUPON_ALREADY_ISSUED);
         }
 
-        if (!coupon.hasRemaining()) {
+        // 조건부 UPDATE로 수량 증가 (DB 레벨 안전장치)
+        // 락 TTL 만료 등 예외 상황에서도 수량 초과 방지
+        int updated = couponRepository.increaseIssuedQuantityIfAvailable(couponId);
+        if (updated == 0) {
             throw new CustomException(ErrorCode.COUPON_SOLD_OUT);
         }
 
