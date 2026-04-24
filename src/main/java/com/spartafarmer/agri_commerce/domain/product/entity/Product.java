@@ -1,5 +1,6 @@
 package com.spartafarmer.agri_commerce.domain.product.entity;
 
+import com.spartafarmer.agri_commerce.common.entity.BaseEntity;
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
@@ -17,8 +18,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "products")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EntityListeners(AuditingEntityListener.class)
-public class Product {
+public class Product extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,11 +58,6 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
-    // 생성일시
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     // 특가 시작 시간
     @Column(name = "sale_start_time")
     private LocalDateTime saleStartTime;
@@ -79,15 +74,23 @@ public class Product {
     }
 
     public void startSale() {
+        // READY 상태일 때만 시작 가능
+        if (this.status != ProductStatus.READY) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
         if (this.stock == 0) {
-            this.status = ProductStatus.SOLD_OUT; // 재고가 없으면 품절 처리
+            this.status = ProductStatus.SOLD_OUT;
         } else {
-            this.status = ProductStatus.ON_SALE; // 재고가 있으면 판매중으로 변경
+            this.status = ProductStatus.ON_SALE;
         }
     }
 
     public void endSale() {
-        this.status = ProductStatus.SALE_ENDED; // 판매 종료 상태로 변경
+        // ON_SALE 또는 SOLD_OUT 상태일 때만 종료 가능
+        if (this.status != ProductStatus.ON_SALE && this.status != ProductStatus.SOLD_OUT) {
+            throw new CustomException(ErrorCode.PRODUCT_NOT_ON_SALE);
+        }
+        this.status = ProductStatus.SALE_ENDED;
     }
 
     // 재고 차감
