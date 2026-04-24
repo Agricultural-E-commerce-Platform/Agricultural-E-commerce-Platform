@@ -159,6 +159,7 @@ public class CouponIntegrationTest {
 
     @Test
     void 쿠폰_생성_실패_할인금액_음수() throws Exception {
+        // given
         CouponCreateRequest request = new CouponCreateRequest(
                 "음수 쿠폰",
                 -1000L,
@@ -167,11 +168,10 @@ public class CouponIntegrationTest {
                 LocalDateTime.now().plusDays(1)
         );
 
-        ResultActions result = mockMvc.perform(post("/api/coupons")
-                .header("Authorization", bearerToken(adminToken))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+        // when
+        ResultActions result = 쿠폰생성요청(request);
 
+        // then
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("할인 금액은 1원 이상이어야 합니다."));
@@ -179,6 +179,7 @@ public class CouponIntegrationTest {
 
     @Test
     void 쿠폰_생성_실패_할인금액_0() throws Exception {
+        // given
         CouponCreateRequest request = new CouponCreateRequest(
                 "0원 쿠폰",
                 0L,
@@ -187,11 +188,10 @@ public class CouponIntegrationTest {
                 LocalDateTime.now().plusDays(1)
         );
 
-        ResultActions result = mockMvc.perform(post("/api/coupons")
-                .header("Authorization", bearerToken(adminToken))
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)));
+        // when
+        ResultActions result = 쿠폰생성요청(request);
 
+        // then
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("할인 금액은 1원 이상이어야 합니다."));
@@ -425,6 +425,13 @@ public class CouponIntegrationTest {
     private ResultActions 쿠폰발급요청(Long couponId, String token) throws Exception {
         return mockMvc.perform(post("/api/coupons/{couponId}/issue", couponId)
                 .header("Authorization", bearerToken(token)));
+    }
+
+    private ResultActions 쿠폰생성요청(CouponCreateRequest request) throws Exception {
+        return mockMvc.perform(post("/api/coupons")
+                .header("Authorization", bearerToken(adminToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
     }
 
     private String bearerToken(String token) {
