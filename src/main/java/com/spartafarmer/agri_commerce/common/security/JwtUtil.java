@@ -1,8 +1,7 @@
 package com.spartafarmer.agri_commerce.common.security;
 
 import com.spartafarmer.agri_commerce.common.enums.UserRole;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
@@ -61,12 +60,18 @@ public class JwtUtil {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token);  // 서명 검증, 만료시간, 토큰 구조 체크
+                    .parseClaimsJws(token);
             return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
         } catch (Exception e) {
             log.error("JWT validation failed", e);
-            return false;
         }
+        return false;
     }
 
     // 토큰 subject에서 userId 추출
