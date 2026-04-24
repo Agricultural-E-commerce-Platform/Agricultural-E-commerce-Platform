@@ -49,9 +49,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Tag("integration")
 @ActiveProfiles("test")
-@SpringBootTest(properties = {
-        "jwt.secret.key=MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY="
-})
+@SpringBootTest
 @Transactional
 class ProductIntegrationTest {
 
