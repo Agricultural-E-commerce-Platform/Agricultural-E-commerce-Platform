@@ -65,9 +65,9 @@ public class JwtUtil {
         } catch (SecurityException | MalformedJwtException e) {
             log.error("Invalid JWT signature, 유효하지 않는 JWT 서명 입니다.", e);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token, 만료된 JWT token 입니다.", e);
+            log.warn("Expired JWT token, 만료된 JWT token 입니다.");
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.", e);
+            log.warn("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
         } catch (Exception e) {
             log.error("JWT validation failed", e);
         }
