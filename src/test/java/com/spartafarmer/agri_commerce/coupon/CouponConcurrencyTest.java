@@ -29,8 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Tag("integration")
 @Tag("concurrency")
-@SpringBootTest
 @ActiveProfiles("test")
+@SpringBootTest
 public class CouponConcurrencyTest {
 
     @Autowired
