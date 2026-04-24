@@ -4,7 +4,6 @@ import com.spartafarmer.agri_commerce.common.enums.ProductType;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductDetailResponse;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.service.ProductService;
-import jakarta.validation.constraints.Max;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,8 +21,7 @@ public class ProductController {
     @GetMapping
     public Page<ProductListResponse> getProducts(
             @RequestParam(required = false) ProductType type,
-            @PageableDefault(size = 10)
-            @Max(100) Pageable pageable
+            @PageableDefault(size = 10) Pageable pageable
     ) {
         return productService.getProducts(type, pageable);
     }

@@ -4,7 +4,6 @@ import com.spartafarmer.agri_commerce.common.security.AuthUser;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
 import com.spartafarmer.agri_commerce.domain.product.service.PopularSearchService;
 import com.spartafarmer.agri_commerce.domain.product.service.ProductService;
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -27,8 +26,7 @@ public class ProductSearchV2Controller {
     @GetMapping("/search")
     public Page<ProductListResponse> searchProductsV2(
             @RequestParam @Size(min = 1, max = 50) String keyword,
-            @PageableDefault(size = 10)
-            @Max(100) Pageable pageable,
+            @PageableDefault(size = 10) Pageable pageable,
             @AuthenticationPrincipal AuthUser authUser
     ) {
         String normalizedKeyword = productService.normalizeKeyword(keyword);
