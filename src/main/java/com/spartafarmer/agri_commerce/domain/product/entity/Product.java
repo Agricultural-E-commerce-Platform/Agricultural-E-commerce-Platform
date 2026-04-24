@@ -93,6 +93,7 @@ public class Product extends BaseEntity {
         this.status = ProductStatus.SALE_ENDED;
     }
 
+
     // 재고 차감
     public void decreaseStock(int quantity) {
         // 먼저 주문 가능한 상태인지 + 재고는 충분한지 통합 검증
