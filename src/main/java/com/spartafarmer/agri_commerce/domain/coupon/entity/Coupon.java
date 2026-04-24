@@ -31,7 +31,7 @@ public class Coupon extends BaseEntity {
     private int totalQuantity;
 
     // 현재 발급된 수량 (동시성 제어 대상)
-    @Column(nullable = false)
+    @Column(name = "issued_count", nullable = false)
     private int issuedQuantity;
 
     // 쿠폰 발급 시작 시각

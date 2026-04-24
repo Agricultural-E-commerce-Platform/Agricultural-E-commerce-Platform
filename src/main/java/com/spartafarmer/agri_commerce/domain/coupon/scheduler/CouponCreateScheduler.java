@@ -15,18 +15,30 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class CouponCreateScheduler {
 
+    // 주간 쿠폰 정책
+    private static final String WEEKLY_COUPON_NAME = "주간 선착순 할인 쿠폰";
+    private static final Long WEEKLY_COUPON_DISCOUNT_AMOUNT = 5000L;
+    private static final int WEEKLY_COUPON_TOTAL_QUANTITY = 50;
+
+    // 발급 가능 시간 - 당일 09:00 ~ 23:59:59
+    private static final int ISSUE_START_HOUR = 9;
+    private static final int ISSUE_START_MINUTE = 0;
+    private static final int ISSUE_END_HOUR = 23;
+    private static final int ISSUE_END_MINUTE = 59;
+    private static final int ISSUE_END_SECOND = 59;
+
     private final CouponRepository couponRepository;
 
-    @Scheduled(cron = "0 0 9 * * MON")  // 매주 월요일 오전 9시에 실행
+    @Scheduled(cron = "0 0 9 * * MON")
     public void createWeeklyCoupon() {
         LocalDate today = LocalDate.now();
-        LocalDateTime startTime = today.atTime(9, 0);   // 발급 가능 시각 09시
-        LocalDateTime endTime = today.atTime(23, 59, 59);   // 발급 종료 시각 23:59:59
+        LocalDateTime startTime = today.atTime(ISSUE_START_HOUR, ISSUE_START_MINUTE);
+        LocalDateTime endTime = today.atTime(ISSUE_END_HOUR, ISSUE_END_MINUTE, ISSUE_END_SECOND);
 
         Coupon coupon = Coupon.create(
-                "주간 선착순 할인 쿠폰",
-                5000L,  // 할인 금액 5,000원
-                50,                   // 수량 50개
+                WEEKLY_COUPON_NAME,
+                WEEKLY_COUPON_DISCOUNT_AMOUNT,
+                WEEKLY_COUPON_TOTAL_QUANTITY,
                 startTime,
                 endTime
         );
