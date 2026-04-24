@@ -5,7 +5,11 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record SignupRequest (
-        @Email
+        @Email(message = "올바른 이메일 형식이어야 합니다.")
+        @Pattern(
+                regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
+                message = "올바른 이메일 형식이어야 합니다."
+        )
         @NotBlank
         String email,
 
@@ -17,8 +21,10 @@ public record SignupRequest (
         @NotBlank
         String name,
 
-        @Pattern(regexp = "^010(\\d{8}|(-\\d{4}){2})$",
-        message = "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx 또는 010xxxxxxxx)")
+        @Pattern(
+                regexp = "^(010-\\d{4}-\\d{4}|010\\d{8})$",
+                message = "휴대폰 번호 형식이 올바르지 않습니다. (010-xxxx-xxxx 또는 010xxxxxxxx)"
+        )
         @NotBlank
         String phone,
 
