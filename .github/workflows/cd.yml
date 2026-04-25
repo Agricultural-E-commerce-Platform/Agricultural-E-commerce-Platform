@@ -26,10 +26,10 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/app
-  
-            docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml down || true
-            docker-compose -f docker-compose.prod.yml up -d
+
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod pull
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod down || true
+            docker-compose -f docker-compose.prod.yml --env-file .env.prod up -d
             
             docker image prune -f
             
