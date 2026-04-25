@@ -65,10 +65,12 @@ class ProductControllerTest {
         // when & then
         mockMvc.perform(get("/api/products"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("제주 감귤"))
-                .andExpect(jsonPath("$.content[0].type").value("NORMAL"))
-                .andExpect(jsonPath("$.content[1].name").value("한우 특가"))
-                .andExpect(jsonPath("$.content[1].type").value("SPECIAL"));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.content[0].name").value("제주 감귤"))
+                .andExpect(jsonPath("$.data.content[0].type").value("NORMAL"))
+                .andExpect(jsonPath("$.data.content[1].name").value("한우 특가"))
+                .andExpect(jsonPath("$.data.content[1].type").value("SPECIAL"))
+                .andExpect(jsonPath("$.message").value("상품 목록 조회 성공"));
     }
 
     @Test
@@ -88,8 +90,10 @@ class ProductControllerTest {
         mockMvc.perform(get("/api/products")
                         .param("type", "SPECIAL"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("한우 특가"))
-                .andExpect(jsonPath("$.content[0].type").value("SPECIAL"));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.content[0].name").value("한우 특가"))
+                .andExpect(jsonPath("$.data.content[0].type").value("SPECIAL"))
+                .andExpect(jsonPath("$.message").value("상품 목록 조회 성공"));
     }
 
     @Test
@@ -106,8 +110,10 @@ class ProductControllerTest {
         // when & then
         mockMvc.perform(get("/api/products/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("제주 감귤"))
-                .andExpect(jsonPath("$.type").value("NORMAL"))
-                .andExpect(jsonPath("$.status").value("ON_SALE"));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data.name").value("제주 감귤"))
+                .andExpect(jsonPath("$.data.type").value("NORMAL"))
+                .andExpect(jsonPath("$.data.status").value("ON_SALE"))
+                .andExpect(jsonPath("$.message").value("상품 상세 조회 성공"));
     }
 }
