@@ -48,8 +48,10 @@ class PopularSearchControllerTest {
         // when & then
         mockMvc.perform(get("/api/products/search/popular"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].rank").value(1))
-                .andExpect(jsonPath("$[0].keyword").value("딸기"))
-                .andExpect(jsonPath("$[0].searchCount").value(10));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.data[0].rank").value(1))
+                .andExpect(jsonPath("$.data[0].keyword").value("딸기"))
+                .andExpect(jsonPath("$.data[0].searchCount").value(10))
+                .andExpect(jsonPath("$.message").value("인기 검색어 조회 성공"));
     }
 }

@@ -62,7 +62,9 @@ class ProductSearchControllerTest {
         mockMvc.perform(get("/api/v1/products/search")
                         .param("keyword", "감귤"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].name").value("제주 감귤"));
+                .andExpect(jsonPath("$.status").value(200))
+                .andExpect(jsonPath("$.message").value("상품 검색 성공"))
+                .andExpect(jsonPath("$.data.content[0].name").value("제주 감귤"));
     }
 
     @Test
