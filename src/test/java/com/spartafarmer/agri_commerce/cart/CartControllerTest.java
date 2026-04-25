@@ -90,7 +90,7 @@ class CartControllerTest {
         mockMvc.perform(post("/api/carts")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new CartAddRequest(10L, 2))))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.message").value("장바구니 담기 성공"))
                 .andExpect(jsonPath("$.data.cartItemId").value(1))

@@ -3,6 +3,7 @@ package com.spartafarmer.agri_commerce.product;
 import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.enums.ProductType;
 import com.spartafarmer.agri_commerce.common.enums.UserRole;
+import com.spartafarmer.agri_commerce.common.response.ApiResponse;
 import com.spartafarmer.agri_commerce.common.security.AuthUser;
 import com.spartafarmer.agri_commerce.domain.product.controller.ProductSearchV2Controller;
 import com.spartafarmer.agri_commerce.domain.product.dto.ProductListResponse;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -48,20 +51,25 @@ class ProductSearchV2ControllerTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
 
-        ProductListResponse response = new ProductListResponse(
+        ProductListResponse product = new ProductListResponse(
                 1L, "제주 감귤", ProductType.NORMAL,
                 15000L, 12000L, null,
                 100, ProductStatus.ON_SALE, null, LocalDateTime.now()
         );
 
-        Page<ProductListResponse> page = new PageImpl<>(List.of(response), pageable, 1);
+        Page<ProductListResponse> page = new PageImpl<>(List.of(product), pageable, 1);
 
         given(productService.normalizeKeyword("감귤")).willReturn("감귤");
         given(productService.searchProductsWithCache("감귤", pageable)).willReturn(page);
 
         // when
-        Page<ProductListResponse> result =
+        ResponseEntity<ApiResponse<Page<ProductListResponse>>> response =
                 productSearchV2Controller.searchProductsV2("감귤", pageable, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+
+        Page<ProductListResponse> result = response.getBody().getData();
 
         // then
         assertThat(result.getContent()).hasSize(1);
@@ -78,13 +86,13 @@ class ProductSearchV2ControllerTest {
         // given
         Pageable pageable = PageRequest.of(0, 10);
 
-        ProductListResponse response = new ProductListResponse(
+        ProductListResponse product = new ProductListResponse(
                 1L, "제주 감귤", ProductType.NORMAL,
                 15000L, 12000L, null,
                 100, ProductStatus.ON_SALE, null, LocalDateTime.now()
         );
 
-        Page<ProductListResponse> page = new PageImpl<>(List.of(response), pageable, 1);
+        Page<ProductListResponse> page = new PageImpl<>(List.of(product), pageable, 1);
 
         AuthUser authUser = new AuthUser(1L, "test@test.com", UserRole.USER);
 
@@ -92,8 +100,10 @@ class ProductSearchV2ControllerTest {
         given(productService.searchProductsWithCache("감귤", pageable)).willReturn(page);
 
         // when
-        Page<ProductListResponse> result =
+        ResponseEntity<ApiResponse<Page<ProductListResponse>>> response =
                 productSearchV2Controller.searchProductsV2("감귤", pageable, authUser);
+
+        Page<ProductListResponse> result = response.getBody().getData();
 
         // then
         assertThat(result.getContent()).hasSize(1);
