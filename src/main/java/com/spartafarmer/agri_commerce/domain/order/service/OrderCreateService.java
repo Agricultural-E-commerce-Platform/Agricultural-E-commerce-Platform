@@ -1,5 +1,6 @@
 package com.spartafarmer.agri_commerce.domain.order.service;
 
+import com.spartafarmer.agri_commerce.common.enums.ProductStatus;
 import com.spartafarmer.agri_commerce.common.exception.CustomException;
 import com.spartafarmer.agri_commerce.common.exception.ErrorCode;
 import com.spartafarmer.agri_commerce.domain.cart.entity.Cart;
@@ -13,6 +14,7 @@ import com.spartafarmer.agri_commerce.domain.order.entity.Order;
 import com.spartafarmer.agri_commerce.domain.order.entity.OrderItem;
 import com.spartafarmer.agri_commerce.domain.order.repository.OrderRepository;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
+import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepository;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class OrderCreateService {
     private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
     private final UserCouponRepository userCouponRepository;
+    private final ProductRepository productRepository;
 
     /**
      * 주문 생성 전체 흐름
@@ -76,7 +79,7 @@ public class OrderCreateService {
 
     // 장바구니 조회
     private Cart getCart(User user) {
-        return cartRepository.findByUser(user)
+        return cartRepository.findByUserWithItems(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
     }
 
@@ -140,12 +143,21 @@ public class OrderCreateService {
         return finalPrice;
     }
 
-    // 주문 상품 생성 및 재고 차감
+    // 주문 생성 및 DB 원자적 재고 차감
     private void createOrderItemsAndDecreaseStock(Order order, List<CartItem> cartItems) {
         for (CartItem item : cartItems) {
                 Product product = item.getProduct();
                 // 재고 차감
-                product.decreaseStock(item.getQuantity());
+            int updatedCount = productRepository.decreaseStockAtomic(
+                    product.getId(),
+                    item.getQuantity(),
+                    ProductStatus.ON_SALE,
+                    ProductStatus.SOLD_OUT
+            );
+
+            if (updatedCount == 0) {
+                throw new CustomException(ErrorCode.OUT_OF_STOCK);
+            }
                 // 주문 상품 생성
                 OrderItem.create(
                         order,

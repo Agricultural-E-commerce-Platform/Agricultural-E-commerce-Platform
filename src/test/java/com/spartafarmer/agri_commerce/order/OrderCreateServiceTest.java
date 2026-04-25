@@ -17,6 +17,7 @@ import com.spartafarmer.agri_commerce.domain.order.entity.Order;
 import com.spartafarmer.agri_commerce.domain.order.repository.OrderRepository;
 import com.spartafarmer.agri_commerce.domain.order.service.OrderCreateService;
 import com.spartafarmer.agri_commerce.domain.product.entity.Product;
+import com.spartafarmer.agri_commerce.domain.product.repository.ProductRepository;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -30,8 +31,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +52,9 @@ class OrderCreateServiceTest {
     @Mock
     private UserCouponRepository userCouponRepository;
 
+    @Mock
+    private ProductRepository productRepository;
+
     @Test
     void 주문생성_성공() {
         User user = 유저();
@@ -63,7 +66,13 @@ class OrderCreateServiceTest {
         CartItem.create(cart, product2, product2.getSalePrice(), 1);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(cartRepository.findByUser(user)).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
+        given(productRepository.decreaseStockAtomic(
+                any(),
+                anyInt(),
+                eq(ProductStatus.ON_SALE),
+                eq(ProductStatus.SOLD_OUT)
+        )).willReturn(1);
         given(orderRepository.save(any(Order.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         OrderCreateResponse result = orderCreateService.createOrder(1L, null);
@@ -73,8 +82,6 @@ class OrderCreateServiceTest {
         assertThat(result.finalPrice()).isEqualTo(22000L);
         assertThat(result.status()).isEqualTo("COMPLETED");
         assertThat(cart.getCartItems()).isEmpty();
-        assertThat(product1.getStock()).isEqualTo(9);
-        assertThat(product2.getStock()).isEqualTo(9);
     }
 
     @Test
@@ -83,7 +90,7 @@ class OrderCreateServiceTest {
         Cart cart = Cart.create(user);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(cartRepository.findByUser(user)).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
 
         assertThatThrownBy(() -> orderCreateService.createOrder(1L, null))
                 .isInstanceOf(CustomException.class)
@@ -100,7 +107,7 @@ class OrderCreateServiceTest {
         CartItem.create(cart, product, product.getSalePrice(), 1);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(cartRepository.findByUser(user)).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
 
         assertThatThrownBy(() -> orderCreateService.createOrder(1L, null))
                 .isInstanceOf(CustomException.class)
@@ -117,7 +124,7 @@ class OrderCreateServiceTest {
         CartItem.create(cart, specialProduct, specialProduct.getSalePrice(), 1);
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(cartRepository.findByUser(user)).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
 
         assertThatThrownBy(() -> orderCreateService.createOrder(1L, 1L))
                 .isInstanceOf(CustomException.class)
@@ -145,8 +152,14 @@ class OrderCreateServiceTest {
         UserCoupon userCoupon = UserCoupon.issue(user, coupon, LocalDateTime.now());
 
         given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(cartRepository.findByUser(user)).willReturn(Optional.of(cart));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
         given(userCouponRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(userCoupon));
+        given(productRepository.decreaseStockAtomic(
+                any(),
+                anyInt(),
+                eq(ProductStatus.ON_SALE),
+                eq(ProductStatus.SOLD_OUT)
+        )).willReturn(1);
         given(orderRepository.save(any(Order.class))).willAnswer(invocation -> invocation.getArgument(0));
 
         OrderCreateResponse result = orderCreateService.createOrder(1L, 1L);
