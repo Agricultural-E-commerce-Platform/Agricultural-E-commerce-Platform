@@ -82,7 +82,7 @@ class CartIntegrationTest {
                 .content(objectMapper.writeValueAsString(request)));
 
         // then
-        result.andExpect(status().isOk())   // 변경
+        result.andExpect(status().isCreated())   // 변경
                 .andExpect(jsonPath("$.status").value(201))
                 .andExpect(jsonPath("$.message").value("장바구니 담기 성공"))
                 .andExpect(jsonPath("$.data.productId").value(product.getId()))
