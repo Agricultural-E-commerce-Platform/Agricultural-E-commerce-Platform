@@ -26,9 +26,12 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /home/ubuntu/app
+  
             docker-compose -f docker-compose.prod.yml pull
-            docker-compose -f docker-compose.prod.yml down
+            docker-compose -f docker-compose.prod.yml down || true
             docker-compose -f docker-compose.prod.yml up -d
+            
+            docker image prune -f
             
             # 애플리케이션 기동을 위해 초기 10초 대기
             sleep 10
@@ -44,11 +47,11 @@ jobs:
             
               # 200이 아닌 경우 상세 로그 출력 후 다음 루프로 즉시 이동
               echo "❌ Health check failed with HTTP $HTTP_CODE (attempt $i/20)"
-              cat /tmp/health_response.txt
+              docker logs spring-app --tail 20
               sleep 1.5
             done
             
             # 20회 재시도 후에도 성공하지 못한 경우
             echo "🚨 Health check failed after 20 retries."
-            cat /tmp/health_response.txt
+            docker logs spring-app --tail 50
             exit 1
