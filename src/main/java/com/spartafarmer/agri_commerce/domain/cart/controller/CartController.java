@@ -6,6 +6,8 @@ import com.spartafarmer.agri_commerce.domain.cart.dto.*;
 import com.spartafarmer.agri_commerce.domain.cart.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,31 +19,46 @@ public class CartController {
 
     // 장바구니 담기
     @PostMapping
-    public ApiResponse<CartAddResponse> addCart(
+    public ResponseEntity<ApiResponse<CartAddResponse>> addCart(
             @Valid @RequestBody CartAddRequest request,
             @AuthenticationPrincipal AuthUser authUser
     ) {
-        return ApiResponse.success(201, "장바구니 담기 성공", cartService.addCart(authUser.getId(), request));
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(201, "장바구니 담기 성공",
+                        cartService.addCart(authUser.getId(), request)));
     }
 
     // 장바구니 조회
     @GetMapping
-    public ApiResponse<CartResponse> getCart(@AuthenticationPrincipal AuthUser authUser) {
-        return ApiResponse.success(200, "장바구니 조회 성공", cartService.getCart(authUser.getId()));
+    public ResponseEntity<ApiResponse<CartResponse>> getCart(
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "장바구니 조회 성공",
+                        cartService.getCart(authUser.getId())));
     }
 
     // 수량 변경
     @PatchMapping("/{cartItemId}")
-    public ApiResponse<CartUpdateResponse> updateQuantity(@PathVariable Long cartItemId,
-                                                          @Valid @RequestBody CartUpdateRequest request,
-                                                          @AuthenticationPrincipal AuthUser authUser) {
-        return ApiResponse.success(200, "장바구니 수량 변경 성공", cartService.updateQuantity(cartItemId, request, authUser.getId()));
+    public ResponseEntity<ApiResponse<CartUpdateResponse>> updateQuantity(
+            @PathVariable Long cartItemId,
+            @Valid @RequestBody CartUpdateRequest request,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "장바구니 수량 변경 성공",
+                        cartService.updateQuantity(cartItemId, request, authUser.getId())));
     }
 
     // 장바구니 삭제
     @DeleteMapping("/items/{cartItemId}")
-    public ApiResponse<Void> deleteCartItem(@PathVariable Long cartItemId, @AuthenticationPrincipal AuthUser authUser) {
+    public ResponseEntity<ApiResponse<Void>> deleteCartItem(
+            @PathVariable Long cartItemId,
+            @AuthenticationPrincipal AuthUser authUser
+    ) {
         cartService.deleteCartItem(cartItemId, authUser.getId());
-        return ApiResponse.success(200, "장바구니 상품 삭제 성공", null);
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "장바구니 상품 삭제 성공", null));
     }
 }

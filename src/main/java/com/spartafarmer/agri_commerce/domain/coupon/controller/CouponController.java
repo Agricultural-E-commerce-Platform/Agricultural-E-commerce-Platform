@@ -42,14 +42,18 @@ public class CouponController {
     @GetMapping
     public ResponseEntity<ApiResponse<Page<CouponListResponse>>> getCoupons(
             @PageableDefault(size = 10) Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(couponService.getCoupons(pageable)));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "쿠폰 목록 조회 성공",
+                        couponService.getCoupons(pageable)));
     }
 
     // 내 쿠폰 목록 조회
     @GetMapping("/me")
     public ResponseEntity<ApiResponse<List<UserCouponResponse>>> getMyCoupons(
             @AuthenticationPrincipal AuthUser authUser) {
-        return ResponseEntity.ok(ApiResponse.success(couponService.getMyCoupons(authUser.getId())));
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "내 쿠폰 목록 조회 성공",
+                        couponService.getMyCoupons(authUser.getId())));
     }
 
     // 선착순 쿠폰 발급

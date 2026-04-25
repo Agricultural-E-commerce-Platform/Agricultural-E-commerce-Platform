@@ -8,6 +8,7 @@ import com.spartafarmer.agri_commerce.domain.order.dto.OrderListResponse;
 import com.spartafarmer.agri_commerce.domain.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,33 +23,26 @@ public class OrderController {
 
     // 주문 생성
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ApiResponse<OrderCreateResponse> createOrder(
+    public ResponseEntity<ApiResponse<OrderCreateResponse>> createOrder(
             @AuthenticationPrincipal AuthUser authUser,
             @RequestBody OrderCreateRequest request
     ) {
         OrderCreateResponse response =
                 orderService.createOrder(authUser.getId(), request.userCouponId());
 
-        return ApiResponse.success(
-                201,
-                "주문 생성 성공",
-                response
-        );
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success(201, "주문 생성 성공", response));
     }
 
     // 주문 목록 조회
     @GetMapping
-    public ApiResponse<List<OrderListResponse>> getOrders(
+    public ResponseEntity<ApiResponse<List<OrderListResponse>>> getOrders(
             @AuthenticationPrincipal AuthUser authUser
     ) {
         List<OrderListResponse> response =
                 orderService.getOrders(authUser.getId());
 
-        return ApiResponse.success(
-                200,
-                "주문 목록 조회 성공",
-                response
-        );
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResponse.success(200, "주문 목록 조회 성공", response));
     }
 }
