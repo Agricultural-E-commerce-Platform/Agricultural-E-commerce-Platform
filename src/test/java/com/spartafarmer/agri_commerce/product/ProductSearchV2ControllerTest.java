@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDateTime;
@@ -64,6 +65,9 @@ class ProductSearchV2ControllerTest {
         // when
         ResponseEntity<ApiResponse<Page<ProductListResponse>>> response =
                 productSearchV2Controller.searchProductsV2("감귤", pageable, null);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
 
         Page<ProductListResponse> result = response.getBody().getData();
 
