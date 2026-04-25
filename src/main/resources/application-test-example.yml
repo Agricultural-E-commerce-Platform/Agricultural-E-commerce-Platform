@@ -11,11 +11,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate   # 운영은 절대 update 금지
+      ddl-auto: create-drop  # 테스트 환경 기준
     properties:
       hibernate:
-        show_sql: false
-        format_sql: false
+        show_sql: true
+        format_sql: true
 
   #  Redis 설정
   data:

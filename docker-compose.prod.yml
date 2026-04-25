@@ -1,7 +1,6 @@
 version: "3.8"
 
-# 튜터님 서버 배포용 docker-compose
-# db, redis는 튜터님 서버 3에 이미 설치되어 있어서 제외
+# AWS EC2 서버 배포용 docker-compose
 services:
   app:
     image: ${DOCKERHUB_USERNAME}/agri-commerce:latest
@@ -9,19 +8,45 @@ services:
     ports:
       - "8080:8080"
 
+    env_file:
+      - .env.prod
+
     environment:
       - "SPRING_PROFILES_ACTIVE=prod"
 
       # JWT 설정
       - "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
 
-      # 외부 MySQL (튜터님 서버)
+      # AWS RDS (중요)
       - "SPRING_DATASOURCE_URL=jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}"
       - "SPRING_DATASOURCE_USERNAME=${DB_USER}"
       - "SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}"
 
-      # 외부 Redis (튜터님 서버)
+      # AWS Redis
       - "SPRING_DATA_REDIS_HOST=${REDIS_HOST}"
       - "SPRING_DATA_REDIS_PORT=${REDIS_PORT}"
 
+    depends_on:
+      - redis
+
     restart: always
+
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+
