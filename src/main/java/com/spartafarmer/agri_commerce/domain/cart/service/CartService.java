@@ -85,7 +85,7 @@ public class CartService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
-        Cart cart = cartRepository.findByUser(user)
+        Cart cart = cartRepository.findByUserWithItems(user)
                 .orElseThrow(() -> new CustomException(ErrorCode.CART_NOT_FOUND));
         List<CartItemResponse> items = cart.getCartItems().stream()
                 .map(item -> new CartItemResponse(

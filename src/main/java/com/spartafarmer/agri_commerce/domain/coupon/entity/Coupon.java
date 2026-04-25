@@ -31,7 +31,7 @@ public class Coupon extends BaseEntity {
     private int totalQuantity;
 
     // 현재 발급된 수량 (동시성 제어 대상)
-    @Column(nullable = false)
+    @Column(name = "issued_count", nullable = false)
     private int issuedQuantity;
 
     // 쿠폰 발급 시작 시각
@@ -61,11 +61,6 @@ public class Coupon extends BaseEntity {
     // 발급 수량 증가 (Redis Lock 획득 후 호출)
     public void increaseIssuedQuantity() {
         this.issuedQuantity++;
-    }
-
-    // 잔여 수량 확인
-    public boolean hasRemaining() {
-        return this.issuedQuantity < this.totalQuantity;
     }
 
     // 발급 가능 시간 확인

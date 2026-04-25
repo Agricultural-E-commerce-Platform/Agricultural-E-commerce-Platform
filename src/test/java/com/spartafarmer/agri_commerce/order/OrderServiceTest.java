@@ -21,10 +21,12 @@ import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import com.spartafarmer.agri_commerce.domain.user.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +37,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class OrderServiceTest {
@@ -166,8 +169,7 @@ class OrderServiceTest {
         Order order = Order.create(user, null, 25000L, 0L, 25000L);
         OrderItem.create(order, product, product.getSalePrice(), 2);
 
-        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
-        given(orderRepository.findAllByUserIdOrderByCreatedAtDesc(anyLong())).willReturn(List.of(order));
+        given(orderRepository.findAllWithItemsAndProductByUserId(anyLong())).willReturn(List.of(order));
 
         // when
         List<OrderListResponse> result = orderService.getOrders(1L);
@@ -181,14 +183,58 @@ class OrderServiceTest {
     }
 
     @Test
-    void 주문목록조회_실패_유저없음() {
-        // given
-        given(userRepository.findById(anyLong())).willReturn(Optional.empty());
+    void 주문생성_락키생성_중복제거_정렬성공() {
+        User user = User.create(
+                "test@test.com", "pass1234", "테스트유저",
+                "010-1234-5678", "서울", UserRole.USER
+        );
 
-        // when & then
-        assertThatThrownBy(() -> orderService.getOrders(1L))
-                .isInstanceOf(CustomException.class)
-                .satisfies(e -> assertThat(((CustomException) e).getErrorCode())
-                        .isEqualTo(ErrorCode.USER_NOT_FOUND));
+        Product product1 = Product.create(
+                "사과", ProductType.NORMAL, 15000L, 12000L, null,
+                10, ProductStatus.ON_SALE, "apple.jpg"
+        );
+        Product product2 = Product.create(
+                "배", ProductType.NORMAL, 12000L, 10000L, null,
+                10, ProductStatus.ON_SALE, "pear.jpg"
+        );
+
+        // id 세팅이 필요하면 실제 엔티티 구조에 맞게 생성/리플렉션/테스트 헬퍼 사용
+        // 여기서는 설명상 product1 id=2, product2 id=1 이라고 가정
+        setProductId(product1, 2L);
+        setProductId(product2, 1L);
+
+        Cart cart = Cart.create(user);
+        CartItem.create(cart, product1, product1.getSalePrice(), 1);
+        CartItem.create(cart, product2, product2.getSalePrice(), 1);
+        CartItem.create(cart, product1, product1.getSalePrice(), 2); // 중복 상품
+
+        given(userRepository.findById(anyLong())).willReturn(Optional.of(user));
+        given(cartRepository.findByUserWithItems(user)).willReturn(Optional.of(cart));
+
+        OrderCreateResponse expected = new OrderCreateResponse(
+                1L, List.of(), 34000L, 0L, 34000L, "COMPLETED", LocalDateTime.now()
+        );
+        given(lockService.executeWithLocks(any(), any(), any())).willReturn(expected);
+
+        orderService.createOrder(1L, null);
+
+        ArgumentCaptor<List<String>> keysCaptor = ArgumentCaptor.forClass(List.class);
+        ArgumentCaptor<Duration> ttlCaptor = ArgumentCaptor.forClass(Duration.class);
+
+        verify(lockService).executeWithLocks(keysCaptor.capture(), ttlCaptor.capture(), any());
+
+        assertThat(keysCaptor.getValue())
+                .containsExactly("product:stock:1", "product:stock:2");
+        assertThat(ttlCaptor.getValue()).isEqualTo(Duration.ofSeconds(3));
+    }
+
+    private void setProductId(Product product, Long id) {
+        try {
+            var field = Product.class.getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(product, id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

@@ -2,12 +2,16 @@ package com.spartafarmer.agri_commerce.domain.coupon.repository;
 
 import com.spartafarmer.agri_commerce.domain.coupon.entity.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.time.LocalDateTime;
-import java.util.List;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface CouponRepository extends JpaRepository<Coupon, Long> {
 
-    // 만료 처리 대상 쿠폰 조회 (endTime 이 지난 것)
-    List<Coupon> findAllByEndTimeBefore(LocalDateTime now);
+    // 조건부 UPDATE - 수량 여유가 있을 때만 issuedQuantity 증가
+    // affected rows = 1: 성공, 0: 수량 소진
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Coupon c SET c.issuedQuantity = c.issuedQuantity + 1 " +
+            "WHERE c.id = :couponId AND c.issuedQuantity < c.totalQuantity")
+    int increaseIssuedQuantityIfAvailable(@Param("couponId") Long couponId);
 }

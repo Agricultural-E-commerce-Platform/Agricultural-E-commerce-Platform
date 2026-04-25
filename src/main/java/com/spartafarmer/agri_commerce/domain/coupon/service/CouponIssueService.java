@@ -39,14 +39,16 @@ public class CouponIssueService {
             throw new CustomException(ErrorCode.COUPON_ALREADY_ISSUED);
         }
 
-        if (!coupon.hasRemaining()) {
+        // 조건부 UPDATE로 수량 증가 (DB 레벨 안전장치)
+        // 락 TTL 만료 등 예외 상황에서도 수량 초과 방지
+        int updated = couponRepository.increaseIssuedQuantityIfAvailable(couponId);
+        if (updated == 0) {
             throw new CustomException(ErrorCode.COUPON_SOLD_OUT);
         }
 
-        coupon.increaseIssuedQuantity();
-
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        // UserCoupon 생성 시 연관관계만 필요하므로 프록시로 조회 (SELECT 쿼리 생략)
+        // JWT 인증을 통과한 userId라 존재 검증 불필요
+        User user = userRepository.getReferenceById(userId);
 
         UserCoupon userCoupon = UserCoupon.issue(user, coupon, LocalDateTime.now());
         userCouponRepository.save(userCoupon);

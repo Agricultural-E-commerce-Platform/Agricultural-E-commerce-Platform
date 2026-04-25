@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Tag("integration")
+@ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
@@ -153,6 +155,46 @@ public class CouponIntegrationTest {
         result.andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.message").value("종료 시각은 시작 시각보다 이후여야 합니다."));
+    }
+
+    @Test
+    void 쿠폰_생성_실패_할인금액_음수() throws Exception {
+        // given
+        CouponCreateRequest request = new CouponCreateRequest(
+                "음수 쿠폰",
+                -1000L,
+                100,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)
+        );
+
+        // when
+        ResultActions result = 쿠폰생성요청(request);
+
+        // then
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("할인 금액은 1원 이상이어야 합니다."));
+    }
+
+    @Test
+    void 쿠폰_생성_실패_할인금액_0() throws Exception {
+        // given
+        CouponCreateRequest request = new CouponCreateRequest(
+                "0원 쿠폰",
+                0L,
+                100,
+                LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusDays(1)
+        );
+
+        // when
+        ResultActions result = 쿠폰생성요청(request);
+
+        // then
+        result.andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("할인 금액은 1원 이상이어야 합니다."));
     }
 
     @Test
@@ -383,6 +425,13 @@ public class CouponIntegrationTest {
     private ResultActions 쿠폰발급요청(Long couponId, String token) throws Exception {
         return mockMvc.perform(post("/api/coupons/{couponId}/issue", couponId)
                 .header("Authorization", bearerToken(token)));
+    }
+
+    private ResultActions 쿠폰생성요청(CouponCreateRequest request) throws Exception {
+        return mockMvc.perform(post("/api/coupons")
+                .header("Authorization", bearerToken(adminToken))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)));
     }
 
     private String bearerToken(String token) {
