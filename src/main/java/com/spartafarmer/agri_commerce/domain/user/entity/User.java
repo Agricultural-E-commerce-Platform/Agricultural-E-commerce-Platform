@@ -66,7 +66,9 @@ public class User extends BaseEntity {
         // 만약을 위한 null 체크
         if (phone == null) return null;
 
-        String formattedPhone = phone.replaceAll("-", "");
+        String formattedPhone = phone
+                .replaceAll("-", "")
+                .replaceAll("\\s", "");
 
         // 방어적으로 전화번호 11자리 체크
         if (formattedPhone.length() != 11) {

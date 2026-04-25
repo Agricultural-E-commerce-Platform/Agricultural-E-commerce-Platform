@@ -51,8 +51,8 @@ class CouponIssueServiceTest {
         given(couponRepository.findById(couponId)).willReturn(Optional.of(coupon));
         given(coupon.isAvailableNow(any())).willReturn(true);
         given(userCouponRepository.existsByUserIdAndCouponId(userId, couponId)).willReturn(false);
-        given(coupon.hasRemaining()).willReturn(true);
-        given(userRepository.findById(userId)).willReturn(Optional.of(user));
+        given(couponRepository.increaseIssuedQuantityIfAvailable(couponId)).willReturn(1);
+        given(userRepository.getReferenceById(userId)).willReturn(user);
 
         given(userCouponRepository.save(any())).willReturn(userCoupon);
 
@@ -61,7 +61,7 @@ class CouponIssueServiceTest {
 
         // then
         assertThat(response).isNotNull();
-        verify(coupon).increaseIssuedQuantity();
+        verify(couponRepository).increaseIssuedQuantityIfAvailable(couponId);
     }
 
     @Test
@@ -118,7 +118,7 @@ class CouponIssueServiceTest {
         given(coupon.isAvailableNow(any())).willReturn(true);
         given(userCouponRepository.existsByUserIdAndCouponId(any(), any()))
                 .willReturn(false);
-        given(coupon.hasRemaining()).willReturn(false);
+        given(couponRepository.increaseIssuedQuantityIfAvailable(any())).willReturn(0);
 
         assertThatThrownBy(() ->
                 couponIssueService.issueCoupon(1L, 1L))
@@ -126,23 +126,4 @@ class CouponIssueServiceTest {
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.COUPON_SOLD_OUT);
     }
 
-    @Test
-    @DisplayName("실패: 존재하지 않는 유저 ID로 발급 요청 시 예외를 던진다.")
-    void issueCoupon_실패_유저_없음() {
-        Coupon coupon = mock(Coupon.class);
-
-        given(couponRepository.findById(any()))
-                .willReturn(Optional.of(coupon));
-        given(coupon.isAvailableNow(any())).willReturn(true);
-        given(userCouponRepository.existsByUserIdAndCouponId(any(), any()))
-                .willReturn(false);
-        given(coupon.hasRemaining()).willReturn(true);
-        given(userRepository.findById(any()))
-                .willReturn(Optional.empty());
-
-        assertThatThrownBy(() ->
-                couponIssueService.issueCoupon(1L, 1L))
-                .isInstanceOf(CustomException.class)
-                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NOT_FOUND);
-    }
 }

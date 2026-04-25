@@ -22,13 +22,12 @@ public class CouponExpireScheduler {
     @Scheduled(cron = "0 0 0 * * SAT")  // 매주 토요일 자정에 실행
     @Transactional
     public void expireCoupons() {
-        List<UserCoupon> expiredCoupons = userCouponRepository
-                .findByStatusAndExpiredAtBefore(CouponStatus.AVAILABLE, LocalDateTime.now());
+        int updated = userCouponRepository.bulkExpire(
+                CouponStatus.AVAILABLE,
+                CouponStatus.EXPIRED,
+                LocalDateTime.now()
+        );
 
-        for (UserCoupon userCoupon : expiredCoupons) {
-            userCoupon.expire();
-        }
-
-        log.info("만료 쿠폰 처리 완료 - {}건", expiredCoupons.size());
+        log.info("만료 쿠폰 처리 완료 - {}건", updated);
     }
 }

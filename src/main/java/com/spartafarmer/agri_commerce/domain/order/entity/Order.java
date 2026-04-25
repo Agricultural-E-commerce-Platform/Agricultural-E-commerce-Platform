@@ -1,6 +1,7 @@
 package com.spartafarmer.agri_commerce.domain.order.entity;
 
 import com.spartafarmer.agri_commerce.common.entity.BaseEntity;
+import com.spartafarmer.agri_commerce.common.enums.OrderStatus;
 import com.spartafarmer.agri_commerce.domain.coupon.entity.UserCoupon;
 import com.spartafarmer.agri_commerce.domain.user.entity.User;
 import jakarta.persistence.*;
@@ -64,22 +65,6 @@ public class Order extends BaseEntity {
         order.status = OrderStatus.COMPLETED;
         return order;
     }
-
-    // 주문 실패
-    public static Order fail(User user,
-                             UserCoupon coupon,
-                             Long totalPrice) {
-
-        Order order = new Order();
-        order.user = user;
-        order.coupon = coupon;
-        order.totalPrice = totalPrice;
-        order.discountPrice = 0L;
-        order.finalPrice = totalPrice;
-        order.status = OrderStatus.FAILED;
-        return order;
-    }
-
 
     // 주문에 상품을 포함시키기 위한 메서드 (양방향 관계 동기화)
     public void addOrderItem(OrderItem orderItem) {
