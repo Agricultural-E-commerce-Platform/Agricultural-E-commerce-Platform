@@ -15,7 +15,7 @@ services:
 
     environment:
       - "SPRING_PROFILES_ACTIVE=prod"
-      - "SPRING_JPA_HIBERNATE_DDL_AUTO=update"
+      - "SPRING_JPA_HIBERNATE_DDL_AUTO=validate"
 
       # JWT 설정
       - "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
