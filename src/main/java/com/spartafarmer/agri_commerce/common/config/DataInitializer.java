@@ -30,7 +30,7 @@ import java.util.List;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@Profile({"local", "prod"}) // 로컬 + 서버 환경에서 실행(추후 AWS 구현 시 local만 남길 예정)
+@Profile("local")
 public class DataInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
