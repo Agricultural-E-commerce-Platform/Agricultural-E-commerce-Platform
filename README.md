@@ -131,7 +131,7 @@
 - ExecutorService + CyclicBarrier 기반 동시성 테스트
 - 본인이 작성하지 않은 도메인을 테스트하는 교차 테스트 방식 적용
 
-👉 [테스트 케이스 상세 보기](문서레포링크)
+👉 [테스트 케이스 상세 보기](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/blob/50c7d199a2d3525c6ee79ca0020525c3b0881502/documents/test/TestCases.md)
 
 ---
 
@@ -268,15 +268,10 @@ GET http://localhost:8080/actuator/health
 | ERD 설계 | [ERD](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/blob/8d79269c75335dbac254ce7cc7987cd4b2f5aedd/documents/erd/ERD.md) |
 | API 명세 | [API Specification](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/blob/8d79269c75335dbac254ce7cc7987cd4b2f5aedd/documents/api/API.md) |
 | 마일스톤 | [Milestone](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/blob/8d79269c75335dbac254ce7cc7987cd4b2f5aedd/documents/milestone/Milestone.md) |
-| 테스트 케이스 | [Test Cases](문서레포링크) |
-| 트러블슈팅 | [Troubleshooting](문서레포링크) |
+| 테스트 케이스 | [Test Cases](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/blob/50c7d199a2d3525c6ee79ca0020525c3b0881502/documents/test/TestCases.md) |
+| 트러블슈팅 | [Troubleshooting](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/tree/50c7d199a2d3525c6ee79ca0020525c3b0881502/documents/troubleshooting) |
 | 회의록 | [Meetings](https://github.com/Agricultural-E-commerce-Platform/Agricultural-E-commerce-Platform-Docs/tree/8d79269c75335dbac254ce7cc7987cd4b2f5aedd/documents/meetings) |
 
----
-
-## 🚨 트러블슈팅
-
-👉 [자세히 보기](문서레포링크)
 
 ---
 
