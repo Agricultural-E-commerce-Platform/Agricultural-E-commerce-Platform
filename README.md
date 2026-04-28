@@ -283,3 +283,9 @@ GET http://localhost:8080/actuator/health
 | 정은지 | 부팀장 | Product, Search |
 | 김예은 | QA / 서기 | Order, Cart |
 | 이중현 | QA 총괄 / DB | Coupon, Admin |
+
+
+---
+
+# ⚖️ License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
