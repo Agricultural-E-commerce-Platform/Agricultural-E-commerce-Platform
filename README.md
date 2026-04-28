@@ -250,9 +250,13 @@ java -jar build/libs/*.jar
 
 ### 5. 서버 상태 확인
 
+- 로컬
 ```http
 GET http://localhost:8080/actuator/health
 ```
+
+- AWS 배포 서버
+http://13.209.12.239:8080/actuator/health
 
 
 ---
