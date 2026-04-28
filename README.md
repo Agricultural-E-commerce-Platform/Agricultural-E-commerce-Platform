@@ -79,7 +79,7 @@
 
 ### Backend
 - Java 17
-- Spring Boot
+- Spring Boot 3.x
 - Spring Security + JWT
 - Spring Data JPA
 - QueryDSL
